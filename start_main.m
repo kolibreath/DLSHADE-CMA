@@ -22,6 +22,8 @@ mentry_size  = 5;   % size of memory
 M_F = ones(mentry_size) * 0.5;
 M_CR = ones(mentry_size) * 0.5;
 
+k = 1;              % the start point of memory update of LSHADE memory
+
 %% init population
 B = eye(N , N);
 D = ones(N, 1);
