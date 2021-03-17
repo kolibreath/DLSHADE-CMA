@@ -1,7 +1,9 @@
-function [f, cr] = gnFCR(popsize)
+function [f, cr] = gnFCR(popsize, mu_f, mu_cr)
 %GENFCR generate popsize * 1 F and CR vector
     %  input: 
         % popsize      -- the size of population
+        % mu_f         -- mean value of distribution generating f
+        % mu_cr        -- mean value of distribution generating cr
     %  output:
         % F            -- the vector of scale factor   (vector of popsize * 1)
         % CR           -- the vector of crossover rate (vector of popsize * 1)

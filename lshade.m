@@ -83,7 +83,6 @@ for func = 1:30
         %% main loop
         while nfes < max_nfes
             pop = popold; % the old population becomes the current population
-            [temp_fit, sorted_index] = sort(fitness, 'ascend');
 
             mem_rand_index = ceil(memory_size * rand(popsize, 1));
             % generate mu_f and mu_cr for Cauchy and Gaussian distribution
@@ -91,26 +90,8 @@ for func = 1:30
             mu_cr = memory_scr(mem_rand_index);
 
             [f, cr] = gnFCR(popsize);
-
-            r0 = [1:popsize];
-            popAll = [pop; archive.pop];
-            [r1, r2] = gnR1R2(popsize, size(popAll, 1), r0);
-
-            %% DE/current-to-pbest mutation and crossover
-            pNP = max(round(p_best_rate * popsize), 2); %% choose at least two best solutions
-            randindex = ceil(rand(1, popsize) .* pNP); %% select from [1, 2, 3, ..., pNP]
-            randindex = max(1, randindex); %% to avoid the problem that rand = 0 and thus ceil(rand) = 0
-            pbest = pop(sorted_index(randindex), :); %% randomly choose one of the top 100p% solutions
-
-            % mutation
-            vi = pop + f(:, ones(1, problem_size)) .* (pbest - pop + pop(r1, :) - popAll(r2, :));
-            vi = boundConstraint(vi, pop, lu);
-
-            % crossover
-            mask = rand(popsize, problem_size) > cr(:, ones(1, problem_size)); % mask is used to indicate which elements of ui comes from the parent
-            rows = (1:popsize)'; cols = floor(rand(popsize, 1) * problem_size) + 1; % choose one position where the element of ui doesn't come from the parent
-            jrand = sub2ind([popsize problem_size], rows, cols); mask(jrand) = false;
-            ui = vi; ui(mask) = pop(mask);
+            
+            ui = gnOffspring(pop, p_best_rate, popsize, f, cr);
 
             children_fitness = feval(fhd, ui', func);
             children_fitness = children_fitness';
