@@ -1,8 +1,8 @@
-function ui = gnOffspring(pop, p_best_rate, popsize, f, cr)
+function ui = gnOffspring(pop, mu, popsize, f, cr)
 %GNOFFSPRING generate offspring by DE/current-to-pbetter*/
 % input:
     % pop                   -- population of individuals (pop_fr or pop_ec)
-    % p_best_rate:          -- top p% from pop
+    % mu:                   -- p_best_rate * popsize
     % popsize               -- size of population
     % f                     -- scale factor (vector of popsize * 1)
     % cr                    -- crossover rate (vector of popsize * 1)
@@ -22,7 +22,7 @@ function ui = gnOffspring(pop, p_best_rate, popsize, f, cr)
     end 
     
     %% top p%
-    pNP = max(round(p_best_rate * popsize), 2); %% choose at least two best solutions
+    pNP = max(round(mu), 2); %% choose at least two best solutions
     randindex = ceil(rand(1, popsize) .* pNP); %% select from [1, 2, 3, ..., pNP]
     randindex = max(1, randindex); %% to avoid the problem that rand = 0 and thus ceil(rand) = 0
     pbest = pop(randindex, :); %% randomly choose one of the top 100p% solutions TODO 这个应该是排序之后的选择，检查！
