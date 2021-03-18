@@ -84,8 +84,8 @@ for func = 1:28
         B = eye(problem_size, problem_size); 
         D = ones(problem_size, 1); 
         C = B * diag(D.^2) * B';
-        invsqrtC_fr = B * diag(D.^ - 1) * B'; % C^-1/2
-        eigeneval_fr = 0; % track update of B and D
+        invsqrtC = B * diag(D.^ - 1) * B'; % C^-1/2
+        eigeneval = 0; % track update of B and D
         
         chiN = problem_size^0.5 * (1 - 1 / (4 * problem_size) + 1 / (21 * problem_size^2)); % expectation of ||N(0,I)|| == norm(randn(N,1))
 
@@ -99,38 +99,42 @@ for func = 1:28
         popsize_fr = floor(popsize / 2);
         popsize_ec = popsize - popsize_fr;
         
+        pop_fr = zeros(popsize_fr, problem_size);
+        pop_ec = zeros(popsize_ec, problem_size);
         % initialize popsize_fr
         for k = 1 : popsize_fr
-            pop_fr(k,:) =  xmean + sigma * B * (D .* randn(N, 1));
-            nfes = nfes + 1;
+            pop_fr(k,:) =  xmean + sigma * B * (D .* randn(problem_size, 1));
         end
         
-        % initialize popsize_fr
-        for k = 1 : popsize_fr
-            pop_ec(k,:) =  xmean + sigma * B * (D .* randn(N, 1));
-            nfes = nfes + 1;
+        % initialize popsize_ec
+        for k = 1 : popsize_ec
+            pop_ec(k,:) =  xmean + sigma * B * (D .* randn(problem_size, 1));
         end
         
+        % assign members for subpopulation
+        % assem_pop(pop,popsize,xmean,C,D,B,invsqrtC,eigeneval)
+        pop_fr = assem_pop(pop_fr, popsize_fr, xmean,C,D,B,invsqrtC,eigeneval);
+        pop_ec = assem_pop(pop_ec, popsize_ec, xmean,C,D,B,invsqrtC,eigeneval);
         
-        pop = popold; % the old population becomes the current population
-
-        fitness = feval(fhd, pop', func);
-        fitness = fitness';
+        %evaluate both pop_fr and pop_ec
+        pop_fr = evalpop(pop_fr, func);
+        pop_ec = evalpop(pop_ec, func);
 
         nfes = 0;
         bsf_fit_var = 1e+30;
         bsf_solution = zeros(1, problem_size);
 
         %%%%%%%%%%%%%%%%%%%%%%%% for out
-        for i = 1:popsize
-
-            if fitness(i) < bsf_fit_var
-                bsf_fit_var = fitness(i);
-                bsf_solution = pop(i, :);
-            end
-
-            if nfes > max_nfes; break; end
-        end
+        %%% TODO 根据算法修改
+%         for i = 1:popsize
+% 
+%             if fitness(i) < bsf_fit_var
+%                 bsf_fit_var = fitness(i);
+%                 bsf_solution = pop(i, :);
+%             end
+% 
+%             if nfes > max_nfes; break; end
+%         end
 
         %%%%%%%%%%%%%%%%%%%%%%%% for out
 
