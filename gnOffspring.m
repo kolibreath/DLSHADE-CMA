@@ -15,13 +15,16 @@ function ui = gnOffspring(pop, mu, popsize, f, cr)
     pfs = violated_num / popsize;     % proportion of violated numbers
     
     [~, columns] = size(pop);  % columns = N + 2 (fitness and conV)
+    % TODO 在搜索前期，pfs比较小，需要多选择conv进行排序， 在搜索后期，根据fitness排序
+    % TODO 可以采取不同的mutation 策略
     if rand  > pfs % sorted by conV
         pop = sortrows(pop, columns);
     else
         pop = sortrows(pop, columns - 1);
-    end 
+    end
     
-    %% top p%
+    %TODO 添加ranking 根据迭代的情况采用 linear rank selection 或者是exponential
+    %top p%
     pNP = max(round(mu), 2); %% choose at least two best solutions
     randindex = ceil(rand(1, popsize) .* pNP); %% select from [1, 2, 3, ..., pNP]
     randindex = max(1, randindex); %% to avoid the problem that rand = 0 and thus ceil(rand) = 0

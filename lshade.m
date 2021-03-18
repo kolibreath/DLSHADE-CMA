@@ -148,34 +148,37 @@ for func = 1:28
 
         %% main loop
         while nfes < max_nfes
-            pop = popold; % the old population becomes the current population
-
-            mem_rand_index = ceil(memory_size * rand(popsize, 1));
-            % generate mu_f and mu_cr for Cauchy and Gaussian distribution
-            mu_f = memory_sf(mem_rand_index);
-            mu_cr = memory_scr(mem_rand_index);
-
-            [f, cr] = gnFCR(popsize);
+            %  TODO test here!
+%             pop = popold; % the old population becomes the current population
             
-            ui = gnOffspring(pop, p_best_rate, popsize, f, cr);
+            % generate f and cr for subpopulations respectively
+            [f_fr, cr_fr] = gnFCR(pop_fr.popsize);
+            [f_ec, cr_ec] = gnFCR(pop_ec.popsize);
+            
+            ui_fr = gnOffspring(pop_fr, p_best_rate, pop_fr.popsize, f_fr, cr_fr);
+            ui_ec = gnOffspring(pop_ec, p_best_rate, pop_ec.popsize, f_ec, cr_ec);
 
-            children_fitness = feval(fhd, ui', func);
-            children_fitness = children_fitness';
+            % evaluate offspring populations of subpopulations
+            ui_fr = evalpop(ui_fr, func);
+            ui_ec = evalpop(ui_ec, func);
+            
+            nfes = nfes + popsize;
 
             %%%%%%%%%%%%%%%%%%%%%%%% for out
-            for i = 1:popsize
-                nfes = nfes + 1;
-
-                if children_fitness(i) < bsf_fit_var
-                    bsf_fit_var = children_fitness(i);
-                    bsf_solution = ui(i, :);
-                end
-
-                if nfes > max_nfes
-                    break;
-                end
-
-            end
+            % TODO 选择最佳的个体的逻辑需要改一下！！！
+%             for i = 1:popsize
+%                 nfes = nfes + 1;
+% 
+%                 if children_fitness(i) < bsf_fit_var
+%                     bsf_fit_var = children_fitness(i);
+%                     bsf_solution = ui(i, :);
+%                 end
+% 
+%                 if nfes > max_nfes
+%                     break;
+%                 end
+% 
+%             end
 
             %%%%%%%%%%%%%%%%%%%%%%%% for out
 
@@ -183,18 +186,20 @@ for func = 1:28
 
             %% I == 1: the parent is better; I == 2: the offspring is better
             % TODO wtf???
-            I = (fitness > children_fitness);
-            goodCR = cr(I == 1);
-            goodF = f(I == 1);
-            dif_val = dif(I == 1);
+%             I = (fitness > children_fitness);
+%             goodCR = cr(I == 1);
+%             goodF = f(I == 1);
+%             dif_val = dif(I == 1);
+% 
+%             archive = updateArchive(archive, popold(I == 1, :), fitness(I == 1));
+% 
+%             [fitness, I] = min([fitness, children_fitness], [], 2);
+% 
+%             popold = pop;
+%             popold(I == 2, :) = ui(I == 2, :);
 
-            archive = updateArchive(archive, popold(I == 1, :), fitness(I == 1));
-
-            [fitness, I] = min([fitness, children_fitness], [], 2);
-
-            popold = pop;
-            popold(I == 2, :) = ui(I == 2, :);
-
+            % compare subpopulations and the offspring population of them
+            
             num_success_params = numel(goodCR);
 
             if num_success_params > 0

@@ -1,4 +1,4 @@
-function [f, cr] = gnFCR(popsize, mu_f, mu_cr)
+function [f, cr] = gnFCR(popsize)
 %GENFCR generate popsize * 1 F and CR vector
     %  input: 
         % popsize      -- the size of population
@@ -9,6 +9,11 @@ function [f, cr] = gnFCR(popsize, mu_f, mu_cr)
         % CR           -- the vector of crossover rate (vector of popsize * 1)
 
     
+     mem_rand_index = ceil(memory_size * rand(popsize, 1));
+     % generate mu_f and mu_cr for Cauchy and Gaussian distribution
+     mu_f = memory_sf(mem_rand_index);
+     mu_cr = memory_scr(mem_rand_index);
+
      %% for generating crossover rate
      cr = normrnd(mu_cr, 0.1);
      term_pos = find(mu_cr == -1);       % whenever cr is set to terminal value
