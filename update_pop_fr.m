@@ -1,5 +1,5 @@
-function [pop, archive_fr, archive, suc_f, suc_cr] = update_pop_fr(pop,ui,archive,f,cr)
-%COMPARE_FR implementing Deb's feasibility rule 
+function [pop, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_fr(pop,ui,archive,f,cr)
+%COMPARE_FR update population using FROFI
 % input:
     % pop          -- population
     % ui           -- offspring population of pop
@@ -13,6 +13,8 @@ function [pop, archive_fr, archive, suc_f, suc_cr] = update_pop_fr(pop,ui,archiv
     % suc_f        -- successful scale factor by ui
     % suc_cr       -- successful crossover rate by ui
     % both suc_f and suc_cr are column vector (suc_num * 1)
+    % delta_k      -- improvement of successful offspring compared to
+    % parent considering both fitness and conv
     
 % Steps: 
 %  1) if x1 and x2 are both feasible and the one with better fitness will
@@ -29,12 +31,12 @@ function [pop, archive_fr, archive, suc_f, suc_cr] = update_pop_fr(pop,ui,archiv
 
 % Version 1.2 Author: Shi Zeyuan 734780178@qq.com
     
-    % find those from offspring population whose fitness is better than
-    % their parent but defeated in Deb's feasibility rule selection 
 %% 
     suc_cr = [];
     suc_f = [];
     archive_fr = [];
+    
+    delta_k = [];
     
     for k = 1 : pop.popsize
        cur_par = pop(k);
@@ -51,7 +53,7 @@ function [pop, archive_fr, archive, suc_f, suc_cr] = update_pop_fr(pop,ui,archiv
        if par_conv ~=0 && off_conv ~= 0
           if par_conv > off_conv
              %parent is defeated
-             [pop,archive,suc_f,suc_cr] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr);
+             [pop,archive,suc_f,suc_cr, delta_k] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr);
           else
               % ui is defeated 
               [archive_fr, archive_frofi] = save_archive(archive_fr, archive_frofi, cur_par, cur_off);
@@ -60,7 +62,7 @@ function [pop, archive_fr, archive, suc_f, suc_cr] = update_pop_fr(pop,ui,archiv
        elseif par_conv == 0 && off_conv == 0
            if par_fit > off_fit 
               %parent is defeated
-              [pop,archive,suc_f,suc_cr] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr);
+              [pop,archive,suc_f,suc_cr, delta_k] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr);
            else
                % ui is defeated 
               [archive_fr, archive_frofi] = save_archive(archive_fr, archive_frofi, cur_par, cur_off);
@@ -69,7 +71,7 @@ function [pop, archive_fr, archive, suc_f, suc_cr] = update_pop_fr(pop,ui,archiv
        else 
            if off_conv == 0 
              %parent is defeated
-             [pop,archive,suc_f,suc_cr] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr);
+             [pop,archive,suc_f,suc_cr, delta_k] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr);
            else 
                 % ui is defeated 
               [archive_fr, archive_frofi] = save_archive(archive_fr, archive_frofi, cur_par, cur_off);
@@ -82,17 +84,11 @@ function [pop, archive_fr, archive, suc_f, suc_cr] = update_pop_fr(pop,ui,archiv
 end
     
 
-function [pop, archive, suc_f, suc_cr] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr)
-  % replace and store in archive
-  pop(k, :) = cur_off;
-  archive = [archive; cur_par];
-  % record successful f and cr
-  suc_f = [suc_f; f(k)];
-  suc_cr = [suc_cr;cr(k)];
-end
-
 function [archive_fr, archive_frofi] = save_archive(archive_fr, archive_frofi, cur_par, cur_off)
-% SAVE_ARCHIVE when ui is defeated, check if its fitness better than its parent
+% SAVE_ARCHIVE when ui is defeated, check if its fitness better than its
+% parent, if it is better than parent, save it into archive_frofi, beforing
+% applying replacement strategy in FROFI; otherwise save it into
+% archive_fr, which will be later used for replacing individuals in pop_ec.
 % input: 
     % archive_fr            -- save defeated offspring from pop_fr
     % arhive_frofi          -- save defeated offspring from pop_fr, if its fitness better than its parent
@@ -110,6 +106,7 @@ function [archive_fr, archive_frofi] = save_archive(archive_fr, archive_frofi, c
 end
 
 function  pop = replacement(pop,archive_frofi)
+% FRORI replacement strategy
 % input:
     % pop             -- population
     % archive_frofi   -- defeated individual but have better fitness than parent

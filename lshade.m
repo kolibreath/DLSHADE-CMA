@@ -44,7 +44,8 @@ for func = 1:28
         max_nfes = 10000 * problem_size;
         
         %% PARAMETER SETTINGS FOR FROFI
-        MRN  = 5; % number of MRN parts 
+        %% PARAMETER SETTINGS FOR EPSILON CONSTRAINTS
+        epsilon = 0;
         %% PARAMETER SETTINGS FOR LSHADE
         p_best_rate = 0.11;
         arc_rate = 1.4;
@@ -104,16 +105,24 @@ for func = 1:28
         pop_fr = zeros(popsize_fr, problem_size);
         pop_ec = zeros(popsize_ec, problem_size);
         % initialize popsize_fr
-        for k = 1 : popsize_fr
+        k = 1;
+        while k <= popsize_fr || k <= popsize_ec
             pop_fr(k,:) =  xmean + sigma * B * (D .* randn(problem_size, 1));
-        end
-        
-        % initialize popsize_ec
-        for k = 1 : popsize_ec
             pop_ec(k,:) =  xmean + sigma * B * (D .* randn(problem_size, 1));
+            k = k + 1;
         end
         
-        %TODO 如果后续有sort操作在population上记得复制再还原
+        while k <= popsize_fr 
+            pop_fr(k, :) = xmean + sigma * B * (D .* randn(problem_size, 1));
+            k = k + 1;
+        end
+        
+        while k <= popsize_ec
+            pop_ec(k, :) = xmean + sigma * B * (D .* randn(problem_size, 1));
+            k = k + 1;
+        end
+        
+        % TODO update epsilon update Covariance matrix and sigma
         % assign members for subpopulation
         pop_fr = assem_pop(pop_fr, popsize_fr, problem_size, xmean,C,D,B,invsqrtC,eigeneval);
         pop_ec = assem_pop(pop_ec, popsize_ec, problem_size, xmean,C,D,B,invsqrtC,eigeneval);
@@ -183,24 +192,19 @@ for func = 1:28
 %             end
 
             %%%%%%%%%%%%%%%%%%%%%%%% for out
-
-            dif = abs(fitness - children_fitness);
-
-            %% I == 1: the parent is better; I == 2: the offspring is better
-            % TODO wtf???
-%             I = (fitness > children_fitness);
-%             goodCR = cr(I == 1);
-%             goodF = f(I == 1);
-%             dif_val = dif(I == 1);
-% 
-%             archive = updateArchive(archive, popold(I == 1, :), fitness(I == 1));
-% 
-%             [fitness, I] = min([fitness, children_fitness], [], 2);
-% 
-%             popold = pop;
-%             popold(I == 2, :) = ui(I == 2, :);
-
-            % compare subpopulations and the offspring population of them
+            
+            delta_k_fr = []; delta_k_ec = [];
+            suc_f_fr = [];suc_f_ec = [];
+            suc_cr_fr = []; suc_cr_ec = [];
+            % [pop, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_fr(pop,ui,archive,f,cr,delta_k)
+            [pop_fr,archive_fr,archive,suc_f_fr,suc_cr_fr,delta_k_fr] = update_pop_fr(pop_fr,ui_fr,archive,f_fr,cr_cr,delta_k_fr);
+            [pop_ec,archive_ec,archive,suc_f_ec,suc_cr_ec,delta_k_ec] = update_pop_ec(pop_ec,ui_ec,archive,f_ec_cr_ec,delta_k_ec);
+            
+            % combining information from subpopulation
+            delta_k = [delta_k_fr;delta_k_ec];
+            suc_f = [suc_f_fr;suc_f_ec];
+            suc_cr = [suc_cr_fr;suc_cr_ec];
+            
             
             num_success_params = numel(goodCR);
 
