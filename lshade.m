@@ -43,7 +43,9 @@ for func = 1:28
         lu = decision_range(func, problem_size)';
         max_nfes = 10000 * problem_size;
         
-        %%  PARAMETER SETTINGS FOR LSHADE
+        %% PARAMETER SETTINGS FOR FROFI
+        MRN  = 5; % number of MRN parts 
+        %% PARAMETER SETTINGS FOR LSHADE
         p_best_rate = 0.11;
         arc_rate = 1.4;
         memory_size = 5;
@@ -111,10 +113,10 @@ for func = 1:28
             pop_ec(k,:) =  xmean + sigma * B * (D .* randn(problem_size, 1));
         end
         
+        %TODO 如果后续有sort操作在population上记得复制再还原
         % assign members for subpopulation
-        % assem_pop(pop,popsize,xmean,C,D,B,invsqrtC,eigeneval)
-        pop_fr = assem_pop(pop_fr, popsize_fr, xmean,C,D,B,invsqrtC,eigeneval);
-        pop_ec = assem_pop(pop_ec, popsize_ec, xmean,C,D,B,invsqrtC,eigeneval);
+        pop_fr = assem_pop(pop_fr, popsize_fr, problem_size, xmean,C,D,B,invsqrtC,eigeneval);
+        pop_ec = assem_pop(pop_ec, popsize_ec, problem_size, xmean,C,D,B,invsqrtC,eigeneval);
         
         %evaluate both pop_fr and pop_ec
         pop_fr = evalpop(pop_fr, func);

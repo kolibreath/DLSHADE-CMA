@@ -31,9 +31,7 @@ function [pop, archive_fr, archive, suc_f, suc_cr] = update_pop_fr(pop,ui,archiv
     
     % find those from offspring population whose fitness is better than
     % their parent but defeated in Deb's feasibility rule selection 
-    
-    record_index = find(ui(end) > pop(end) & ui(end-1) < pop(end-1));
-    
+%% 
     suc_cr = [];
     suc_f = [];
     archive_fr = [];
@@ -49,49 +47,128 @@ function [pop, archive_fr, archive, suc_f, suc_cr] = update_pop_fr(pop,ui,archiv
        off_conv = cur_off(end);
        
        % TODO extract common logic
-       % between two infeasible solutions, the one with smaller smaller conV wins
+       %% between two infeasible solutions, the one with smaller smaller conV wins
        if par_conv ~=0 && off_conv ~= 0
           if par_conv > off_conv
-              % replace and store in archive
-              pop(k, :) = cur_off;
-              archive = [archive; cur_par];
-              % record successful f and cr
-              suc_f = [suc_f; f(k)];
-              suc_cr = [suc_cr;cr(k)];
+             %parent is defeated
+             [pop,archive,suc_f,suc_cr] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr);
           else
               % ui is defeated 
-              archive_fr = [archive_fr; ui];
+              [archive_fr, archive_frofi] = save_archive(archive_fr, archive_frofi, cur_par, cur_off);
           end
-       % if both feasible, better fitness is preferred
+       %% if both feasible, better fitness is preferred
        elseif par_conv == 0 && off_conv == 0
-           
            if par_fit > off_fit 
-               % replace and store in archive
-               pop(k, :) = cur_off;
-               archive = [archive; cur_par];
-               % record successful f and cr
-               suc_f = [suc_f; f(k)];
-               suc_cr = [suc_cr;cr(k)];
+              %parent is defeated
+              [pop,archive,suc_f,suc_cr] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr);
            else
                % ui is defeated 
-               archive_fr = [archive_fr; ui];
+              [archive_fr, archive_frofi] = save_archive(archive_fr, archive_frofi, cur_par, cur_off);
            end
-       % feasible one is better than its infeasible counterpart
+       %% feasible one is better than its infeasible counterpart
        else 
            if off_conv == 0 
-              % replace and store in archive
-              pop(k, :) = cur_off;
-              archive = [archive; cur_par];
-              % record successful f and cr
-              suc_f = [suc_f; f(k)];
-              suc_cr = [suc_cr;cr(k)];
+             %parent is defeated
+             [pop,archive,suc_f,suc_cr] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr);
            else 
-               % ui is defeated 
-               archive_fr = [archive_fr; ui];
+                % ui is defeated 
+              [archive_fr, archive_frofi] = save_archive(archive_fr, archive_frofi, cur_par, cur_off);
            end
        end
     end
    
-    % applying FROFI replacement strategy
+    %% applying FROFI replacement strategy
+    pop = replacement(pop, archive_frofi);
+end
     
 
+function [pop, archive, suc_f, suc_cr] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr)
+  % replace and store in archive
+  pop(k, :) = cur_off;
+  archive = [archive; cur_par];
+  % record successful f and cr
+  suc_f = [suc_f; f(k)];
+  suc_cr = [suc_cr;cr(k)];
+end
+
+function [archive_fr, archive_frofi] = save_archive(archive_fr, archive_frofi, cur_par, cur_off)
+% SAVE_ARCHIVE when ui is defeated, check if its fitness better than its parent
+% input: 
+    % archive_fr            -- save defeated offspring from pop_fr
+    % arhive_frofi          -- save defeated offspring from pop_fr, if its fitness better than its parent
+    % cur_par               -- current parent
+    % cur_off               -- current offspring
+% output    
+    % archive_fr            -- save defeated offspring from pop_fr
+    % arhive_frofi          -- save defeated offspring from pop_fr, if its fitness better than its parent
+    
+    if cur_par(end-1) > cur_off(end-1)
+        archive_frofi = [archive_frofi; cur_off];
+    else
+        archive_fr = [archive_fr; cur_off];
+    end
+end
+
+function  pop = replacement(pop,archive_frofi)
+% input:
+    % pop             -- population
+    % archive_frofi   -- defeated individual but have better fitness than parent
+% output:
+    % p               -- updated population
+
+%%
+ % calculate the size of the population p(popsize) and the number of dimensions(n) of
+ % the tested function
+ popsize = pop.popsize;
+ n = pop.problem_size;
+ 
+ % the maximum number of vectors to be replaced
+ N=round(max(5,n/2)); 
+ 
+ % the number of parts to be divided
+ MRN=round(popsize/N);
+ 
+ objF = pop(:, end-1);
+ conV = pop(:, end);
+ 
+ recordobjF = archive_frofi(:, end-1);
+ recordconV = archive_frofi(:, end);
+ % sort the objective function value in descendant order
+ [~,sortindex]=sort(-objF); 
+ 
+ % divide the population into Nf parts according to their objective function values 
+ % in descendant order and execute the replacement operation
+ for i=1:floor(popsize/MRN)
+  
+   % calculate the current number of the recorded vectors  
+   len=length(archive_frofi);
+   
+   % when the recored set is not empty, excuted the replacement operation
+   if len~=0 
+      
+      % calculate index of the vector which has maximum degree of
+      % constraint violation in the ith part
+      subConV=conV(sortindex((i-1)*MRN+1:(i-1)*MRN+MRN));
+      [~,maxIndex]=max(subConV);     
+      maxIndex=(i-1)*MRN+maxIndex;
+      maxSubConVIndex=sortindex(maxIndex);  
+      
+      % calculate index of the vector which has minimum degree of
+      % constraint violation in the recorded population
+      [~,minRecordconVIndex]=min(recordconV);
+      
+      % replacement according to the objective function value
+      if recordobjF(minRecordconVIndex) < objF(maxSubConVIndex)
+          
+          % replacement  
+          pop(maxSubConVIndex,:) = archive_frofi(minRecordconVIndex,:);
+          
+          % delete the corresponding vector from the recorded population
+          recordconV(minRecordconVIndex)=[];
+          recordobjF(minRecordconVIndex)=[];
+          archive_frofi(minRecordconVIndex,:)=[];     
+     end   
+  end
+ end
+
+end
