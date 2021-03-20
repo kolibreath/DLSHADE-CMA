@@ -1,11 +1,17 @@
 function sorted_ec = sort_ec(pop, epsilon)
-    %SORT_EC sort pop based on epsilon constriant
-    % Steps
+%SORT_EC sort pop based on epsilon constriant
+% input: 
+    % pop           -- population
+    % epsilon       -- epsilon constraint value
+% output:
+    % sorted_ec     -- sorted population using epsilon_constriant method
+% Steps
     % x1 is better than x2 when
     % 1) f(x1) < f(x2) if conV(x1), conV(x2) < epsilon
     % 2) f(x1) < f(x2) if conV(x1) == conV(x2)
     % 3) conV(x1) < conV(x2) otherwise
 
+% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
     %TODO further check here!
     conv = pop(:, end);
 

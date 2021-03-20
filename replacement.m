@@ -6,6 +6,7 @@ function  pop = replacement(pop,archive)
 % output:
     % p               -- updated population
 
+% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
 %%
  % calculate the size of the population p(popsize) and the number of dimensions(n) of
  % the tested function

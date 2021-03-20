@@ -8,7 +8,9 @@ function [f, cr] = gnFCR(popsize)
         % F            -- the vector of scale factor   (vector of popsize * 1)
         % CR           -- the vector of crossover rate (vector of popsize * 1)
 
-    
+% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18 
+
+%%
      mem_rand_index = ceil(memory_size * rand(popsize, 1));
      % generate mu_f and mu_cr for Cauchy and Gaussian distribution
      mu_f = memory_sf(mem_rand_index);

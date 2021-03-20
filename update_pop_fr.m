@@ -29,7 +29,7 @@ function [pop, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_fr(pop,u
 %  NOTE: If the selected one is from pop, it will go to archive (shared by 
 %  subpopulations), otherwise the one from ui will be stored at archive_fr
 
-% Version 1.2 Author: Shi Zeyuan 734780178@qq.com
+% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
     
 %% 
     suc_cr = [];

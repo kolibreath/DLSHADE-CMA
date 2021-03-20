@@ -5,7 +5,9 @@ function sorted_pop = sort_fr(pop)
     % 1) feasible individuals are better than all infeasible ones
     % 2) in all infeasible individuals, less conv is preferred
     % less function value is considered better individuals
-    
+
+% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
+
     feasible_index = find(pop(:, end) == 0); % indicies
     feasible_individuals = pop(feasible_index);
     % sort based on fitness (function value)

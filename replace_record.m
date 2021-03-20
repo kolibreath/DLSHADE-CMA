@@ -14,8 +14,10 @@ function [pop, archive, suc_f, suc_cr, delta_k] = replace_record(pop,k,cur_off,a
     % archive   -- archive saving defeating parents
     % suc_f     -- storing successful scale factor f
     % suc_cr    -- storing successful crossover rate cr
-% Version 1.2 Author: Shi Zeyuan 734780178@qq.com
     
+% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
+
+%%
     % find those from offspring population whose fitness is better than
     % their parent but defeated in Deb's feasibility rule selection 
 % scale factor F and crossover rate cr

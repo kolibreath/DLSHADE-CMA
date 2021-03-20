@@ -10,7 +10,7 @@ function delta_k = delta_k(par_conv, par_fit, off_conv, off_fit)
     % off          -- offspring
 % output:
     % delta_k      -- combining improvement from both par and off
-% Version 1.2 Author: Shi Zeyuan 734780178@qq.com
+% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
 
 %% 
     delta_fitness = max(par_fit - off_fit, 0);

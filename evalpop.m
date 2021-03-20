@@ -7,6 +7,8 @@ function pop = evalpop(pop,func)
     
 % output:   
     % pop       -- population after evaluation
+% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
+
     [f, g, h] = CEC2017(pop, func);   % f: fitness g: inequality constraints h:equality constraints
     conV = overall_cv(g, h);
     pop = [pop_fr,g, h, f, conV];

@@ -21,7 +21,8 @@ function [pop,archive_ec,archive,suc_f,suc_cr, delta_k] = update_pop_ec(pop,ui,a
     % 1) f(x1) < f(x2) if conV(x1), conV(x2) < epsilon
     % 2) f(x1) < f(x2) if conV(x1) == conV(x2)
     % 3) conV(x1) < conV(x2) otherwise
-    
+
+% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
 %%
     delta_k = [];
     archive_ec = [];

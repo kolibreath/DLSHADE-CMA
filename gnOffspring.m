@@ -8,7 +8,9 @@ function ui = gnOffspring(pop, mu, popsize, f, cr)
     % cr                    -- crossover rate (vector of popsize * 1)
 % output:
     % ui                    -- individual after mutation and crossover
-    
+
+% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
+
     %% DE/current-to-pbest mutation and crossover
     % pop will be sorted according to feasibilty proportion 
     violated_num = length(find(pop(end) >= 0));

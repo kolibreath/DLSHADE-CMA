@@ -16,8 +16,10 @@ function [pop] = resize_pop(max_popsize,min_popsize,pop,max_nfes,nfes)
     % regions, and in the later stages of evolution, individuals converge in
     % feasible regions and look for the best solution by deleting worst
     % solution based on the rank of fitness
-%   此处显示详细说明
-  %% for resizing the population size
+    
+% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
+
+%% for resizing the population size
     plan_popsize = round((((min_popsize - max_popsize) / max_nfes) * nfes) + max_popsize);
     popsize = pop.popsize;
     if popsize > plan_popsize

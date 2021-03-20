@@ -12,6 +12,9 @@ function pop = assem_pop(pop,popsize, problem_size,xmean,C,D,B,invsqrtC,eigeneva
 % output:
     % pop           -- struct of pop after assembling
 
+% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
+
+%% 
     pop.popsize = popsize;
     pop.xmean = xmean;
     pop.C = C;
