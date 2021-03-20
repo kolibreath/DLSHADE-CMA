@@ -101,6 +101,8 @@ for func = 1:28
         % handling techniques (and parameters related to the techniques)
         popsize_fr = floor(popsize / 2);
         popsize_ec = popsize - popsize_fr;
+        max_popsize = floor(max_popsize / 2);
+        min_popsize = floor(min_popsize / 2);
         
         pop_fr = zeros(popsize_fr, problem_size);
         pop_ec = zeros(popsize_ec, problem_size);
@@ -194,6 +196,7 @@ for func = 1:28
             %%%%%%%%%%%%%%%%%%%%%%%% for out
             
             delta_k_fr = []; delta_k_ec = [];
+            % TODO CHECK 给元素的值可能没有使用
             suc_f_fr = [];suc_f_ec = [];
             suc_cr_fr = []; suc_cr_ec = [];
             % [pop, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_fr(pop,ui,archive,f,cr,delta_k)
@@ -206,20 +209,21 @@ for func = 1:28
             suc_cr = [suc_cr_fr;suc_cr_ec];
             
             
-            num_success_params = numel(goodCR);
+            %% update f and cr memory
+            num_success_params = numel(suc_cr);
 
             if num_success_params > 0
-                sum_dif = sum(dif_val);
-                dif_val = dif_val / sum_dif;
+                dif_val = weights_lshade(delta_k);
 
                 %% for updating the memory of scaling factor
-                memory_sf(memory_pos) = (dif_val' * (goodF.^2)) / (dif_val' * goodF);
+                memory_sf(memory_pos) = (dif_val' * (suc_f .^2 )) / (dif_val' * suc_f);
 
                 %% for updating the memory of crossover rate
-                if max(goodCR) == 0 || memory_scr(memory_pos) == -1
+                %TODO 为什么会存在suc_cr 等于0 的情况?
+                if max(suc_cr) == 0 || memory_scr(memory_pos) == -1
                     memory_scr(memory_pos) = -1;
                 else
-                    memory_scr(memory_pos) = (dif_val' * (goodCR.^2)) / (dif_val' * goodCR);
+                    memory_scr(memory_pos) = (dif_val' * (suc_cr.^2)) / (dif_val' * suc_cr);
                 end
 
                 memory_pos = memory_pos + 1;
@@ -230,34 +234,17 @@ for func = 1:28
 
             end
 
-            %% for resizing the population size
-            plan_popsize = round((((min_popsize - max_popsize) / max_nfes) * nfes) + max_popsize);
+            %% resizethe population size of pop_ec and pop_fr
+            % TODO 如果同时对连个子种群施加LSPR这样的变化是否太大了？
+            pop_ec = resize_pop(max_popsize,min_popsize,pop_ec,max_nfes,nfes);
+            pop_fr = resize_pop(max_popsize,min_popsize,pop_fr,max_nfes,nfes);
+            
+            archive.NP = round(arc_rate * (pop_ec + pop_fr));
 
-            if popsize > plan_popsize
-                reduction_ind_num = popsize - plan_popsize;
-
-                if popsize - reduction_ind_num < min_popsize
-                    reduction_ind_num = popsize - min_popsize;
-                end
-
-                popsize = popsize - reduction_ind_num;
-
-                for r = 1:reduction_ind_num
-                    [valBest indBest] = sort(fitness, 'ascend');
-                    worst_ind = indBest(end);
-                    popold(worst_ind, :) = [];
-                    pop(worst_ind, :) = [];
-                    fitness(worst_ind, :) = [];
-                end
-
-                archive.NP = round(arc_rate * popsize);
-
-                if size(archive.pop, 1) > archive.NP
-                    rndpos = randperm(size(archive.pop, 1));
-                    rndpos = rndpos(1:archive.NP);
-                    archive.pop = archive.pop(rndpos, :);
-                end
-
+            if size(archive.pop, 1) > archive.NP
+               rndpos = randperm(size(archive.pop, 1));
+               rndpos = rndpos(1:archive.NP);
+               archive.pop = archive.pop(rndpos, :);
             end
 
         end % end of while
