@@ -126,8 +126,8 @@ for func = 1:28
         
         % TODO update epsilon update Covariance matrix and sigma
         % assign members for subpopulation
-        pop_fr = assem_pop(pop_fr, popsize_fr, problem_size, xmean,C,D,B,invsqrtC,eigeneval);
-        pop_ec = assem_pop(pop_ec, popsize_ec, problem_size, xmean,C,D,B,invsqrtC,eigeneval);
+        pop_fr = assem_pop(pop_fr, popsize_fr, problem_size, xmean,C,D,B,invsqrtC,eigeneval,1);
+        pop_ec = assem_pop(pop_ec, popsize_ec, problem_size, xmean,C,D,B,invsqrtC,eigeneval,2);
         
         %evaluate both pop_fr and pop_ec
         pop_fr = evalpop(pop_fr, func);
@@ -179,6 +179,7 @@ for func = 1:28
 
             %%%%%%%%%%%%%%%%%%%%%%%% for out
             % TODO 选择最佳的个体的逻辑需要改一下！！！
+            % TODO 检查find 相关逻辑
 %             for i = 1:popsize
 %                 nfes = nfes + 1;
 % 
@@ -208,6 +209,8 @@ for func = 1:28
             suc_f = [suc_f_fr;suc_f_ec];
             suc_cr = [suc_cr_fr;suc_cr_ec];
             
+            %% combine archive from offspring subpopulation into parent subpopulation
+            pop_fr = replacement(pop_fr, archvie)
             
             %% update f and cr memory
             num_success_params = numel(suc_cr);
@@ -234,7 +237,7 @@ for func = 1:28
 
             end
 
-            %% resizethe population size of pop_ec and pop_fr
+            %% resize the population size of pop_ec and pop_fr
             % TODO 如果同时对连个子种群施加LSPR这样的变化是否太大了？
             pop_ec = resize_pop(max_popsize,min_popsize,pop_ec,max_nfes,nfes);
             pop_fr = resize_pop(max_popsize,min_popsize,pop_fr,max_nfes,nfes);
@@ -246,17 +249,19 @@ for func = 1:28
                rndpos = rndpos(1:archive.NP);
                archive.pop = archive.pop(rndpos, :);
             end
+            
+            % CMA parameters update
 
         end % end of while
 
-        bsf_error_val = bsf_fit_var - optimum;
-
-        if bsf_error_val < val_2_reach
-            bsf_error_val = 0;
-        end
-
-        fprintf('%d th run, best-so-far error value = %1.8e\n', run_id, bsf_error_val)
-        outcome = [outcome bsf_error_val];
+%         bsf_error_val = bsf_fit_var - optimum;
+% 
+%         if bsf_error_val < val_2_reach
+%             bsf_error_val = 0;
+%         end
+% 
+%         fprintf('%d th run, best-so-far error value = %1.8e\n', run_id, bsf_error_val)
+%         outcome = [outcome bsf_error_val];
         
        end %% end 1 run
     end

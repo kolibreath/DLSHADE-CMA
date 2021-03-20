@@ -27,6 +27,7 @@ function [pop] = resize_pop(max_popsize,min_popsize,pop,max_nfes,nfes)
        pop.popsize = popsize;
 
        % find PFS
+       % TODO 使用这样的方式是否可行?
        feasible_nums = length(find(pop(end) == 0));
        pfs = feasible_nums / popsize;
        
