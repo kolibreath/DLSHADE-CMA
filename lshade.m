@@ -242,6 +242,10 @@ for func = 1:28
             pop_ec = resize_pop(max_popsize,min_popsize,pop_ec,max_nfes,nfes);
             pop_fr = resize_pop(max_popsize,min_popsize,pop_fr,max_nfes,nfes);
             
+            %[pop_fr,pop_ec, delete_individual] = subpop_com(pop_fr,pop_ec,archive_fr,archive_ec)
+            [pop_fr,pop_ec,delete_individuald] = subpop_com(pop_fr,pop_ec,archive_fr,archvie_ec);
+            archive = [archive; delete_individuald];
+            
             archive.NP = round(arc_rate * (pop_ec + pop_fr));
 
             if size(archive.pop, 1) > archive.NP
