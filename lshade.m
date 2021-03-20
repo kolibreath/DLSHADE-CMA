@@ -210,7 +210,7 @@ for func = 1:28
             suc_cr = [suc_cr_fr;suc_cr_ec];
             
             %% combine archive from offspring subpopulation into parent subpopulation
-            pop_fr = replacement(pop_fr, archvie)
+%             pop_fr = replacement(pop_fr, archive);
             
             %% update f and cr memory
             num_success_params = numel(suc_cr);
@@ -250,7 +250,7 @@ for func = 1:28
                archive.pop = archive.pop(rndpos, :);
             end
             
-            % CMA parameters update
+            % CMA parameters update epsilon update
 
         end % end of while
 
