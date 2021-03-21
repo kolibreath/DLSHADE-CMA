@@ -195,11 +195,9 @@ for func = 1:28
             %%%%%%%%%%%%%%%%%%%%%%%% for out
             
             delta_k_fr = []; delta_k_ec = [];
-            % TODO CHECK 给元素的值可能没有使用
-            suc_f_fr = [];suc_f_ec = [];
-            suc_cr_fr = []; suc_cr_ec = [];
-            
-            %% communication between two subpopulations; updated subpopulations stored in structs
+          
+            %% update parent population 
+            % updated subpopulations stored in structs
             [pop_fr_struct,archive_fr,archive,suc_f_fr,suc_cr_fr,delta_k_fr] = update_pop_fr(pop_fr_struct,ui_fr,archive,f_fr,cr_cr,delta_k_fr);
             [pop_ec_struct,archive_ec,archive,suc_f_ec,suc_cr_ec,delta_k_ec] = update_pop_ec(pop_ec_struct,ui_ec,archive,f_ec_cr_ec,delta_k_ec);
             % update subpopulation
@@ -210,10 +208,7 @@ for func = 1:28
             delta_k = [delta_k_fr;delta_k_ec];
             suc_f = [suc_f_fr;suc_f_ec];
             suc_cr = [suc_cr_fr;suc_cr_ec];
-            
-            %% combine archive from offspring subpopulation into parent subpopulation
-%             pop_fr = replacement(pop_fr, archive);
-            
+       
             %% update f and cr memory
             num_success_params = numel(suc_cr);
 
