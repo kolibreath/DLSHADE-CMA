@@ -28,5 +28,6 @@ function [pop, archive, suc_f, suc_cr, delta_k] = replace_record(pop,k,cur_off,a
   suc_cr = [suc_cr;cr(k)];
   
   % delta_k(par_conv, par_fit, off_conv, off_fit)
+  delta_k = [];
   delta_k = [delta_k; delta_k(cur_par(end),cur_par(end-1),cur_off(end),cur_par(end-1))];
 end

@@ -2,13 +2,13 @@ function [f,g,h] = CEC2017(x,I_fno)
 
 % CEC2017 Constrained Optimization Test Suite 
 % Guohua Wu (email: guohuawu@nudt.edu.cn, National University of Defense Technology) 
-
+% Note: modified by Shi Zeyuan inorder to load Functions from a relative path
 [ps,D]=size(x);
 global initial_flag
 persistent o M M1 M2
 if(I_fno == 1)
     if initial_flag == 0
-        load Function1
+        load ./functions/Function1
         o = o(1:D);
         initial_flag = 1;
     end
@@ -25,7 +25,7 @@ end
 
 if(I_fno == 2)
     if initial_flag == 0
-        load Function2
+        load ./functions/Function2
         o = o(1:D);
         if(D==10)
             M = M_10;
@@ -54,7 +54,7 @@ end
 
 if(I_fno == 3)
     if initial_flag == 0
-        load Function3
+        load ./functions/Function3
         o = o(1:D);
         initial_flag = 1;
     end
@@ -69,7 +69,7 @@ end
 
 if(I_fno == 4)
     if initial_flag == 0
-        load Function4
+        load ./functions/Function4
         o = o(1:D);
         initial_flag = 1;
     end
@@ -83,7 +83,7 @@ end
 
 if(I_fno == 5)
     if initial_flag == 0
-        load Function5
+        load ./functions/Function5
         o = o(1:D);
         if(D==10)
             M1 = M1_10; M2 = M2_10;
@@ -111,7 +111,7 @@ end
 
 if(I_fno == 6)
     if initial_flag == 0
-        load Function6
+        load ./functions/Function6
         o = o(1:D);
         initial_flag = 1;
     end
@@ -129,7 +129,7 @@ end
 
 if(I_fno == 7)
     if initial_flag == 0
-        load Function7
+        load ./functions/Function7
         o = o(1:D);
         initial_flag = 1;
     end
@@ -143,7 +143,7 @@ end
 
 if(I_fno == 8)
     if initial_flag == 0
-        load Function8
+        load ./functions/Function8
         o = o(1:D);
         initial_flag = 1;
     end
@@ -162,7 +162,7 @@ end
 
 if(I_fno == 9)
     if initial_flag == 0
-        load Function9
+        load ./functions/Function9
         o = o(1:D);
         initial_flag = 1;
     end
@@ -176,7 +176,7 @@ end
 
 if(I_fno == 10)
     if initial_flag == 0
-        load Function10
+        load ./functions/Function10
         o = o(1:D);
         initial_flag = 1;
     end
@@ -193,7 +193,7 @@ end
 
 if(I_fno == 11)
     if initial_flag == 0
-        load Function11
+        load ./functions/Function11
         o = o(1:D);
         initial_flag = 1;
     end
@@ -206,7 +206,7 @@ end
 %%%%%%%%%%%% -----------------------------%%%%%%%%%%%%%%%%%%
 if (I_fno == 12)
     if initial_flag == 0
-        load ShiftAndRotation
+        load ./functions/ShiftAndRotation
         o = o(1:D);
         initial_flag = 1;
     end
@@ -220,7 +220,7 @@ end
 
 if (I_fno == 13)
     if initial_flag == 0
-        load ShiftAndRotation
+        load ./functions/ShiftAndRotation
         o = o(1:D);
         initial_flag = 1;
     end
@@ -235,7 +235,7 @@ end
 
 if (I_fno == 14)
     if initial_flag == 0
-        load ShiftAndRotation
+        load ./functions/ShiftAndRotation
         o = o(1:D);
         initial_flag = 1;
     end
@@ -248,7 +248,7 @@ end
 
 if (I_fno == 15)
     if initial_flag == 0
-        load ShiftAndRotation
+        load ./functions/ShiftAndRotation
         o = o(1:D);
         initial_flag = 1;
     end
@@ -260,7 +260,7 @@ end
 
 if (I_fno == 16)
     if initial_flag == 0
-        load ShiftAndRotation
+        load ./functions/ShiftAndRotation
         o = o(1:D);
         initial_flag = 1;
     end
@@ -272,7 +272,7 @@ end
 
 if (I_fno == 17)
     if initial_flag == 0
-        load ShiftAndRotation
+        load ./functions/ShiftAndRotation
         o = o(1:D);
         initial_flag = 1;
     end
@@ -289,7 +289,7 @@ end
 
 if (I_fno == 18)
     if initial_flag == 0
-        load ShiftAndRotation
+        load ./functions/ShiftAndRotation
         o = o(1:D);
         initial_flag = 1;
     end
@@ -311,7 +311,7 @@ end
 
 if (I_fno == 19)
     if initial_flag == 0
-        load ShiftAndRotation
+        load ./functions/ShiftAndRotation
         o = o(1:D);
         initial_flag = 1;
     end
@@ -325,7 +325,7 @@ end
 
 if (I_fno == 20)
     if initial_flag == 0
-        load ShiftAndRotation
+        load ./functions/ShiftAndRotation
         o = o(1:D);
         initial_flag = 1;
     end
@@ -344,7 +344,7 @@ end
 
 if (I_fno == 21)
     if initial_flag == 0
-        load ShiftAndRotation
+        load ./functions/ShiftAndRotation
         o = o(1:D);
         if(D==10)
             M = M_10;
@@ -371,7 +371,7 @@ end
 
 if (I_fno == 22)
     if initial_flag == 0
-        load ShiftAndRotation
+        load ./functions/ShiftAndRotation
         o = o(1:D);
         if(D==10)
             M = M_10;
@@ -399,7 +399,7 @@ end
 
 if (I_fno == 23)
     if initial_flag == 0
-        load ShiftAndRotation
+        load ./functions/ShiftAndRotation
         o = o(1:D);
         if(D==10)
             M = M_10;
@@ -425,7 +425,7 @@ end
 
 if (I_fno == 24)
     if initial_flag == 0
-        load ShiftAndRotation
+        load ./functions/ShiftAndRotation
         o = o(1:D);
         if(D==10)
             M = M_10;
@@ -450,7 +450,7 @@ end
 
 if (I_fno == 25)
     if initial_flag == 0
-        load ShiftAndRotation
+        load ./functions/ShiftAndRotation
         o = o(1:D);
         if(D==10)
             M = M_10;
@@ -476,7 +476,7 @@ end
 
 if (I_fno == 26)
     if initial_flag == 0
-        load ShiftAndRotation
+        load ./functions/ShiftAndRotation
         o = o(1:D);
         if(D==10)
             M = M_10;
@@ -506,7 +506,7 @@ end
 
 if (I_fno == 27)
     if initial_flag == 0
-        load ShiftAndRotation
+        load ./functions/ShiftAndRotation
         o = o(1:D);
         if(D==10)
             M = M_10;
@@ -541,7 +541,7 @@ end
 
 if (I_fno == 28)
     if initial_flag == 0
-        load ShiftAndRotation
+        load ./functions/ShiftAndRotation
         o = o(1:D);
         if(D==10)
             M = M_10;

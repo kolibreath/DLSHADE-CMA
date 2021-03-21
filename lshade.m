@@ -17,26 +17,25 @@ clear all;
 format long;
 format compact;
 
-Dimension_size = [10, 30, 50, 100];
+global initial_flag ; % for CEC2017 test function evaluation
 
 rand('seed', sum(100 * clock));
 
-val_2_reach = 10^(-8);
-max_region = 100.0;
-min_region = -100.0;
-fhd = @cec14_func;
-
 for func = 1:28
     optimum = func * 100.0;
-
+    %% PARAMETER SETTINGS FOR PROBLEM SIZE
+    Dimension_size = [10, 30, 50, 100];
+    
     %% Record the best results
     outcome = [];
 
     fprintf('\n-------------------------------------------------------\n')
 
-
+    
     %% for each problem size
-    for problem_size = Dimension_size
+    for dim_num = 2:2
+      problem_size = Dimension_size(dim_num);
+      initial_flag = 0;
       fprintf('Function = %d, Dimension size = %d\n', func, problem_size)
       
       %% for each run:
@@ -45,6 +44,7 @@ for func = 1:28
         % TODO lu是什么样子的向量？
         lu = decision_range(func, problem_size)';  % 2 * problem_size matrix
         max_nfes = 10000 * problem_size;
+        nfes = 0;
         
         %% PARAMETER SETTINGS FOR FROFI
         %% PARAMETER SETTINGS FOR EPSILON CONSTRAINTS
@@ -76,7 +76,8 @@ for func = 1:28
         
 
         %% Initialize the population
-        % one row in matrix pop indicates one individual ((popsize + 2 )* 1 vector)
+        % individual in population will be viewed as (problem_size + 4) * 1 vector
+        % the additional 4 'elements' are [g, h, f, conV] 
    
         % the population is divided into two sub-populations, they have
         % the same (almost the same) parameters but different contraint
@@ -90,7 +91,7 @@ for func = 1:28
         pop_ec = zeros(popsize_ec, problem_size);
         
         %% initialize both subpopulations
-        % individual in population will be viewed as (problem_size + 2) * 1 vector
+        
         k = 1;
         while k <= popsize_fr || k <= popsize_ec
             pop_fr(k,:) =  (cma.xmean' + cma.sigma * B * (D .* randn(problem_size, 1)))';
@@ -108,24 +109,31 @@ for func = 1:28
             k = k + 1;
         end
         
-        clear k; % TODO test
+        clear k; 
         
         % TODO update epsilon update Covariance matrix and sigma
         % assign members for subpopulation
-        pop_fr = assem_pop(pop_fr, popsize_fr, problem_size, xmean,C,D,B,invsqrtC,eigeneval,1);
-        pop_ec = assem_pop(pop_ec, popsize_ec, problem_size, xmean,C,D,B,invsqrtC,eigeneval,2);
+        xmean = cma.xmean;
+        pop_fr_struct = assem_pop(pop_fr,popsize_fr,problem_size,xmean,C,D,B,invsqrtC,eigeneval,cma,1);
+        pop_ec_struct = assem_pop(pop_ec,popsize_ec,problem_size,xmean,C,D,B,invsqrtC,eigeneval,cma,2);
+        clear xmean;
         
         %% evaluate both pop_fr and pop_ec
+        % TODO test! 生成的个体都是可行解！？
         pop_fr = evalpop(pop_fr, func);
         pop_ec = evalpop(pop_ec, func);
         
-        % update epsilon-constraint
-        theta = floor(0.05 * popsize);   % conv of the theta-th individual selected as epsilon_zero
-        sorted_conv = sort(pop_ec(:, end), 'ascend');
-        epsilon_zero = sorted_conv(theta);
+        pop_fr_struct.pop = pop_fr;
+        pop_ec_struct.pop = pop_ec;
         
         nfes = nfes + popsize;
         
+        % update epsilon-constraint
+        theta = floor(0.05 * pop_ec_struct.popsize);   % conv of the theta-th individual selected as epsilon_zero
+        sorted_conv = sort(pop_ec(:, end), 'ascend');
+        epsilon_zero = sorted_conv(theta);
+        
+        % TODO implement best so far!
         bsf_fit_var = 1e+30;
         bsf_solution = zeros(1, problem_size);
 
@@ -153,21 +161,19 @@ for func = 1:28
 
         %% main loop
         while nfes < max_nfes
-            %  TODO test here!
-%             pop = popold; % the old population becomes the current population
-            
+      
             % generate f and cr for subpopulations respectively
-            [f_fr, cr_fr] = gnFCR(pop_fr.popsize);
-            [f_ec, cr_ec] = gnFCR(pop_ec.popsize);
+            [f_fr, cr_fr] = gnFCR(pop_fr_struct.popsize);
+            [f_ec, cr_ec] = gnFCR(pop_ec_struct.popsize);
             
-            ui_fr = gnOffspring(pop_fr, p_best_rate, pop_fr.popsize, f_fr, cr_fr);
-            ui_ec = gnOffspring(pop_ec, p_best_rate, pop_ec.popsize, f_ec, cr_ec);
+            ui_fr = gnOffspring(pop_fr, p_best_rate, pop_fr_struct.popsize, f_fr, cr_fr);
+            ui_ec = gnOffspring(pop_ec, p_best_rate, pop_ec_struct.popsize, f_ec, cr_ec);
 
             % evaluate offspring populations of subpopulations
             ui_fr = evalpop(ui_fr, func);
             ui_ec = evalpop(ui_ec, func);
             
-            nfes = nfes + popsize;
+            nfes = nfes + pop_fr_struct.popsize + pop_ec_struct.popsize;
 
             %%%%%%%%%%%%%%%%%%%%%%%% for out
             % TODO 选择最佳的个体的逻辑需要改一下！！！
@@ -193,9 +199,12 @@ for func = 1:28
             suc_f_fr = [];suc_f_ec = [];
             suc_cr_fr = []; suc_cr_ec = [];
             
-            %% communication between two subpopulations
-            [pop_fr,archive_fr,archive,suc_f_fr,suc_cr_fr,delta_k_fr] = update_pop_fr(pop_fr,ui_fr,archive,f_fr,cr_cr,delta_k_fr);
-            [pop_ec,archive_ec,archive,suc_f_ec,suc_cr_ec,delta_k_ec] = update_pop_ec(pop_ec,ui_ec,archive,f_ec_cr_ec,delta_k_ec);
+            %% communication between two subpopulations; updated subpopulations stored in structs
+            [pop_fr_struct,archive_fr,archive,suc_f_fr,suc_cr_fr,delta_k_fr] = update_pop_fr(pop_fr_struct,ui_fr,archive,f_fr,cr_cr,delta_k_fr);
+            [pop_ec_struct,archive_ec,archive,suc_f_ec,suc_cr_ec,delta_k_ec] = update_pop_ec(pop_ec_struct,ui_ec,archive,f_ec_cr_ec,delta_k_ec);
+            % update subpopulation
+            pop_fr = pop_fr_struct.pop;
+            pop_ec = pop_ec_struct.pop;
             
             % combining information from subpopulation
             delta_k = [delta_k_fr;delta_k_ec];

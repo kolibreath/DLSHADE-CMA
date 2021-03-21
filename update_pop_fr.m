@@ -1,13 +1,13 @@
-function [pop, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_fr(pop,ui,archive,f,cr)
+function [pop_struct, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_fr(pop_struct,ui,archive,f,cr)
 %COMPARE_FR update population using FROFI
 % input:
-    % pop          -- population
+    % pop_struct   -- struct of population matrix, problem_size etc.
     % ui           -- offspring population of pop
     % archive      -- archive stores defeated parents
     % f            -- scale factor used by ui
     % cr           -- crossover rate used by ui
 % output:
-    % pop          -- population 
+    % pop_struct   -- struct saves updated population 
     % archive_fr   -- defeated offspring in ui_fr
     % archive      -- updated archive
     % suc_f        -- successful scale factor by ui
@@ -37,10 +37,13 @@ function [pop, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_fr(pop,u
     archive_fr = [];
     
     delta_k = [];
-    
-    for k = 1 : pop.popsize
-       cur_par = pop(k);
-       cur_off = ui(k);
+    popsize = pop_struct.popsize;
+    pop = pop_struct.pop;
+
+    % compare between offspring individual and parent
+    for k = 1 : popsize
+       cur_par = pop(k,:);
+       cur_off = ui(k,:);
        
        par_fit = cur_par(end - 1);
        off_fit = cur_off(end - 1);
@@ -48,7 +51,6 @@ function [pop, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_fr(pop,u
        par_conv = cur_par(end);
        off_conv = cur_off(end);
        
-       % TODO extract common logic
        %% between two infeasible solutions, the one with smaller smaller conV wins
        if par_conv ~=0 && off_conv ~= 0
           if par_conv > off_conv
@@ -81,6 +83,7 @@ function [pop, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_fr(pop,u
    
     %% applying FROFI replacement strategy
     pop = replacement(pop, archive_frofi);
+    pop_struct.pop = pop;
 end
     
 
