@@ -33,23 +33,27 @@ for func = 1:28
     outcome = [];
 
     fprintf('\n-------------------------------------------------------\n')
-    fprintf('Function = %d, Dimension size = %d\n', func, problem_size)
 
+
+    %% for each problem size
     for problem_size = Dimension_size
+      fprintf('Function = %d, Dimension size = %d\n', func, problem_size)
       
       %% for each run:
       for run_id = 1:51
-          
-        lu = decision_range(func, problem_size)';
+        
+        % TODO lu是什么样子的向量？
+        lu = decision_range(func, problem_size)';  % 2 * problem_size matrix
         max_nfes = 10000 * problem_size;
         
         %% PARAMETER SETTINGS FOR FROFI
         %% PARAMETER SETTINGS FOR EPSILON CONSTRAINTS
         epsilon = 0;
+        cp = 5; 
         %% PARAMETER SETTINGS FOR LSHADE
         p_best_rate = 0.11;
-        arc_rate = 1.4;
-        memory_size = 5;
+        arc_rate = 1.4;         % archive for saving defeated parents
+        memory_size = 5;        % memory for successful F and CR
         popsize = 18 * problem_size;
         
         %% PARAMETER SETTINGS FOR LINEAR POPULATION SIZE REDUCTION (LSPR)
@@ -57,45 +61,23 @@ for func = 1:28
         min_popsize = 4.0;
         
         %% PARAMETER SETTINGS FOR COVARIANCE ADAPTATION MATIRX (CMA)
-        xmean = lu / 2;             % mean value of Gaussian distribution (problem_size * 1 vector)
-        sigma = 0.3;                % step size of Gaussian distribution
-        %TODO CMA-ES原算法中有stop condition 之后测试一下需不需要加上！
-        stopfitness = 1e-10;
-        % two meanings: 
-        %   1) top p% of population based on feasibility or constraint violation  in LSHADE framework
-        %   2) used in CMA to update xmean and some other parameters
-        mu = p_best_rate * popsize; 
-        weights = log(mu + 1/2) - log(1:mu)'; % mu * 1 vector for weighted recombination
-        weights = weights / sum(weights); % normalize recombination weights array
-        mueff = sum(weights)^2 / sum(weights.^2); % variance-effectiveness of sum w_i x_i
+        cma = assem_cma_struct(lu, problem_size,p_best_rate,popsize);
         
-        % Strategy parameter setting: Adaptation
-        cc = (4 + mueff / problem_size) / (N + 4 + 2 * mueff / problem_size); % time constant for cumulation for C
-        cs = (mueff + 2) / (problem_size + mueff + 5); % t-const for cumulation for sigma control
-        c1 = 2 / ((problem_size + 1.3)^2 + mueff); % learning rate for rank-one update of C
-        cmu = min(1 - c1, 2 * (mueff - 2 + 1 / mueff) / ((problem_size + 2)^2 + mueff)); % and for rank-mu update
-        damps = 1 + 2 * max(0, sqrt((mueff - 1) / (problem_size + 1)) - 1) + cs; % damping for sigma  usually close to 1
-        
-        % Initialize dynamic (internal) strategy parameters and constants
-        pc = zeros(problem_size, 1); ps = zeros(problem_size, 1); % evolution paths for C and sigma
-        
-        % initailize for both two sub-populations pop_fr and pop_ec
+        %% PARAMETER SETTTINGS FOR COVARIANCE MATRIX ADAPTATION 
+        % Note: subpopulations evolve these parameters seperately
         % B defines the coordinate system
         % diagonal D defines the scaling
-        % covariance matrix C
-        
+        % covariance matrix C   
         B = eye(problem_size, problem_size); 
         D = ones(problem_size, 1); 
         C = B * diag(D.^2) * B';
         invsqrtC = B * diag(D.^ - 1) * B'; % C^-1/2
         eigeneval = 0; % track update of B and D
         
-        chiN = problem_size^0.5 * (1 - 1 / (4 * problem_size) + 1 / (21 * problem_size^2)); % expectation of ||N(0,I)|| == norm(randn(N,1))
 
         %% Initialize the population
-        %% one row in matrix pop indicates one individual ((popsize + 2 )* 1 vector)
-%         popold = repmat(lu(1, :), popsize, 1) + rand(popsize, problem_size) .* (repmat(lu(2, :) - lu(1, :), popsize, 1));
-        
+        % one row in matrix pop indicates one individual ((popsize + 2 )* 1 vector)
+   
         % the population is divided into two sub-populations, they have
         % the same (almost the same) parameters but different contraint
         % handling techniques (and parameters related to the techniques)
@@ -106,34 +88,44 @@ for func = 1:28
         
         pop_fr = zeros(popsize_fr, problem_size);
         pop_ec = zeros(popsize_ec, problem_size);
-        % initialize popsize_fr
+        
+        %% initialize both subpopulations
+        % individual in population will be viewed as (problem_size + 2) * 1 vector
         k = 1;
         while k <= popsize_fr || k <= popsize_ec
-            pop_fr(k,:) =  xmean + sigma * B * (D .* randn(problem_size, 1));
-            pop_ec(k,:) =  xmean + sigma * B * (D .* randn(problem_size, 1));
+            pop_fr(k,:) =  (cma.xmean' + cma.sigma * B * (D .* randn(problem_size, 1)))';
+            pop_ec(k,:) =  (cma.xmean' + cma.sigma * B * (D .* randn(problem_size, 1)))';
             k = k + 1;
         end
         
         while k <= popsize_fr 
-            pop_fr(k, :) = xmean + sigma * B * (D .* randn(problem_size, 1));
+            pop_fr(k, :) = (cma.xmean' + cma.sigma * B * (D .* randn(problem_size, 1)))';
             k = k + 1;
         end
         
         while k <= popsize_ec
-            pop_ec(k, :) = xmean + sigma * B * (D .* randn(problem_size, 1));
+            pop_ec(k, :) = (cma.xmean' + cma.sigma * B * (D .* randn(problem_size, 1)))';
             k = k + 1;
         end
+        
+        clear k; % TODO test
         
         % TODO update epsilon update Covariance matrix and sigma
         % assign members for subpopulation
         pop_fr = assem_pop(pop_fr, popsize_fr, problem_size, xmean,C,D,B,invsqrtC,eigeneval,1);
         pop_ec = assem_pop(pop_ec, popsize_ec, problem_size, xmean,C,D,B,invsqrtC,eigeneval,2);
         
-        %evaluate both pop_fr and pop_ec
+        %% evaluate both pop_fr and pop_ec
         pop_fr = evalpop(pop_fr, func);
         pop_ec = evalpop(pop_ec, func);
-
-        nfes = 0;
+        
+        % update epsilon-constraint
+        theta = floor(0.05 * popsize);   % conv of the theta-th individual selected as epsilon_zero
+        sorted_conv = sort(pop_ec(:, end), 'ascend');
+        epsilon_zero = sorted_conv(theta);
+        
+        nfes = nfes + popsize;
+        
         bsf_fit_var = 1e+30;
         bsf_solution = zeros(1, problem_size);
 
@@ -256,7 +248,11 @@ for func = 1:28
             end
             
             % CMA parameters update epsilon update
-
+            pop_fr = update_cma(pop_fr, cma,nfes);
+            pop_ec = update_cma(pop_ec, cma,nfes);
+            
+            epsilon = update_epsilon(epsilon_zero, nfes,  fes_control,cp);
+            
         end % end of while
 
 %         bsf_error_val = bsf_fit_var - optimum;
@@ -269,7 +265,8 @@ for func = 1:28
 %         outcome = [outcome bsf_error_val];
         
        end %% end 1 run
-    end
+    
+    end %% end of iterate one problem size
    
 
     fprintf('\n')
