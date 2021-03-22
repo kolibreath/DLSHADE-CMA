@@ -36,6 +36,8 @@ function [pop_struct, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_f
     suc_f = [];
     archive_fr = [];
     
+    archive_frofi = [];
+    
     delta_k = [];
     popsize = pop_struct.popsize;
     pop = pop_struct.pop;
@@ -55,7 +57,7 @@ function [pop_struct, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_f
        if par_conv ~=0 && off_conv ~= 0
           if par_conv > off_conv
              %parent is defeated
-             [pop,archive,suc_f,suc_cr, delta_k] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr);
+             [pop,archive,suc_f,suc_cr, delta_k] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr,delta_k);
           else
               % ui is defeated 
               [archive_fr, archive_frofi] = save_archive(archive_fr, archive_frofi, cur_par, cur_off);
@@ -64,7 +66,7 @@ function [pop_struct, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_f
        elseif par_conv == 0 && off_conv == 0
            if par_fit > off_fit 
               %parent is defeated
-              [pop,archive,suc_f,suc_cr, delta_k] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr);
+              [pop,archive,suc_f,suc_cr, delta_k] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr,delta_k);
            else
                % ui is defeated 
               [archive_fr, archive_frofi] = save_archive(archive_fr, archive_frofi, cur_par, cur_off);
@@ -73,7 +75,7 @@ function [pop_struct, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_f
        else 
            if off_conv == 0 
              %parent is defeated
-             [pop,archive,suc_f,suc_cr, delta_k] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr);
+             [pop,archive,suc_f,suc_cr, delta_k] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr,delta_k);
            else 
                 % ui is defeated 
               [archive_fr, archive_frofi] = save_archive(archive_fr, archive_frofi, cur_par, cur_off);
@@ -82,8 +84,10 @@ function [pop_struct, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_f
     end
    
     %% applying FROFI replacement strategy
-    pop = replacement(pop, archive_frofi);
-    pop_struct.pop = pop;
+    [length,~] = size(archive_frofi);
+    if length ~= 0
+        pop_struct = replacement(pop_struct, archive_frofi);
+    end
 end
     
 
@@ -108,19 +112,20 @@ function [archive_fr, archive_frofi] = save_archive(archive_fr, archive_frofi, c
     end
 end
 
-function  pop = replacement(pop,archive_frofi)
+function  pop = replacement(pop_struct,archive_frofi)
 % FRORI replacement strategy
 % input:
-    % pop             -- population
+    % pop             -- population struct
     % archive_frofi   -- defeated individual but have better fitness than parent
 % output:
-    % p               -- updated population
+    % pop_struct      -- updated population struct
 
 %%
  % calculate the size of the population p(popsize) and the number of dimensions(n) of
  % the tested function
- popsize = pop.popsize;
- n = pop.problem_size;
+ pop = pop_struct.pop;
+ popsize = pop_struct.popsize;
+ n = pop_struct.problem_size;
  
  % the maximum number of vectors to be replaced
  N=round(max(5,n/2)); 
@@ -170,5 +175,7 @@ function  pop = replacement(pop,archive_frofi)
      end   
   end
  end
+ 
+ pop_struct.pop = pop;
 
 end

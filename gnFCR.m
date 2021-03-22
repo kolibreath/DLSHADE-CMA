@@ -1,4 +1,4 @@
-function [f, cr] = gnFCR(popsize)
+function [f, cr] = gnFCR(popsize,memory_size,memory_sf,memory_scr)
 %GENFCR generate popsize * 1 F and CR vector
     %  input: 
         % popsize      -- the size of population

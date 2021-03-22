@@ -38,10 +38,13 @@ for func = 1:28
       initial_flag = 0;
       fprintf('Function = %d, Dimension size = %d\n', func, problem_size)
       
+      bsf_solution = zeros(problem_size + 4, 1);
+      bsf_solution(end-1) = 1e+30;
+      bsf_solution(end)   = 1e+30;
+      
       %% for each run:
-      for run_id = 1:51
+      for run_id = 1:1
         
-        % TODO lu是什么样子的向量？
         lu = decision_range(func, problem_size)';  % 2 * problem_size matrix
         max_nfes = 10000 * problem_size;
         nfes = 0;
@@ -50,6 +53,7 @@ for func = 1:28
         %% PARAMETER SETTINGS FOR EPSILON CONSTRAINTS
         epsilon = 0;
         cp = 5; 
+        fes_control = 0.2 * max_nfes;
         %% PARAMETER SETTINGS FOR LSHADE
         p_best_rate = 0.11;
         arc_rate = 1.4;         % archive for saving defeated parents
@@ -93,7 +97,7 @@ for func = 1:28
         %% initialize both subpopulations
         
         k = 1;
-        while k <= popsize_fr || k <= popsize_ec
+        while k <= popsize_fr &&  k <= popsize_ec
             pop_fr(k,:) =  (cma.xmean' + cma.sigma * B * (D .* randn(problem_size, 1)))';
             pop_ec(k,:) =  (cma.xmean' + cma.sigma * B * (D .* randn(problem_size, 1)))';
             k = k + 1;
@@ -128,29 +132,13 @@ for func = 1:28
         
         nfes = nfes + popsize;
         
-        % update epsilon-constraint
+        %% INITIALIZATION FOR EPSILON-CONSTRAINT
         theta = floor(0.05 * pop_ec_struct.popsize);   % conv of the theta-th individual selected as epsilon_zero
         sorted_conv = sort(pop_ec(:, end), 'ascend');
         epsilon_zero = sorted_conv(theta);
-        
-        % TODO implement best so far!
-        bsf_fit_var = 1e+30;
-        bsf_solution = zeros(1, problem_size);
+        epsilon = max(max(pop_fr(:, end)), max(pop_ec(:, end)));
 
-        %%%%%%%%%%%%%%%%%%%%%%%% for out
-        %%% TODO 根据算法修改
-%         for i = 1:popsize
-% 
-%             if fitness(i) < bsf_fit_var
-%                 bsf_fit_var = fitness(i);
-%                 bsf_solution = pop(i, :);
-%             end
-% 
-%             if nfes > max_nfes; break; end
-%         end
-
-        %%%%%%%%%%%%%%%%%%%%%%%% for out
-
+        %% INITIALIZATION FOR LSHADE ARCHIVE
         memory_sf = 0.5 .* ones(memory_size, 1);
         memory_scr = 0.5 .* ones(memory_size, 1);
         memory_pos = 1;
@@ -163,11 +151,12 @@ for func = 1:28
         while nfes < max_nfes
       
             % generate f and cr for subpopulations respectively
-            [f_fr, cr_fr] = gnFCR(pop_fr_struct.popsize);
-            [f_ec, cr_ec] = gnFCR(pop_ec_struct.popsize);
+            [f_fr, cr_fr] = gnFCR(pop_fr_struct.popsize,memory_size,memory_sf,memory_scr);
+            [f_ec, cr_ec] = gnFCR(pop_ec_struct.popsize,memory_size,memory_sf,memory_scr);
             
-            ui_fr = gnOffspring(pop_fr, p_best_rate, pop_fr_struct.popsize, f_fr, cr_fr);
-            ui_ec = gnOffspring(pop_ec, p_best_rate, pop_ec_struct.popsize, f_ec, cr_ec);
+            % Note: ui_fr and ui_ec are un-evaluated matrix (popsize * problem_size)
+            ui_fr = gnOffspring(pop_fr_struct,lu,archive,p_best_rate,f_fr,cr_fr);
+            ui_ec = gnOffspring(pop_ec_struct,lu,archive,p_best_rate,f_ec,cr_ec);
 
             % evaluate offspring populations of subpopulations
             ui_fr = evalpop(ui_fr, func);
@@ -175,75 +164,33 @@ for func = 1:28
             
             nfes = nfes + pop_fr_struct.popsize + pop_ec_struct.popsize;
 
-            %%%%%%%%%%%%%%%%%%%%%%%% for out
-            % TODO 选择最佳的个体的逻辑需要改一下！！！
-            % TODO 检查find 相关逻辑
-%             for i = 1:popsize
-%                 nfes = nfes + 1;
-% 
-%                 if children_fitness(i) < bsf_fit_var
-%                     bsf_fit_var = children_fitness(i);
-%                     bsf_solution = ui(i, :);
-%                 end
-% 
-%                 if nfes > max_nfes
-%                     break;
-%                 end
-% 
-%             end
-
-            %%%%%%%%%%%%%%%%%%%%%%%% for out
-            
-            delta_k_fr = []; delta_k_ec = [];
-          
-            %% update parent population 
+            %% update parent population TODO 查看是否协会结构体
             % updated subpopulations stored in structs
-            [pop_fr_struct,archive_fr,archive,suc_f_fr,suc_cr_fr,delta_k_fr] = update_pop_fr(pop_fr_struct,ui_fr,archive,f_fr,cr_cr,delta_k_fr);
-            [pop_ec_struct,archive_ec,archive,suc_f_ec,suc_cr_ec,delta_k_ec] = update_pop_ec(pop_ec_struct,ui_ec,archive,f_ec_cr_ec,delta_k_ec);
-            % update subpopulation
-            pop_fr = pop_fr_struct.pop;
-            pop_ec = pop_ec_struct.pop;
+            [pop_fr_struct,archive_fr,archive,suc_f_fr,suc_cr_fr,delta_k_fr] = update_pop_fr(pop_fr_struct,ui_fr,archive,f_fr,cr_fr);
+            [pop_ec_struct,archive_ec,archive,suc_f_ec,suc_cr_ec,delta_k_ec] = update_pop_ec(pop_ec_struct,ui_ec,archive,f_ec,cr_ec,epsilon);
             
             % combining information from subpopulation
             delta_k = [delta_k_fr;delta_k_ec];
             suc_f = [suc_f_fr;suc_f_ec];
             suc_cr = [suc_cr_fr;suc_cr_ec];
+            
+            %TODO remove useless variables
        
             %% update f and cr memory
-            num_success_params = numel(suc_cr);
-
-            if num_success_params > 0
-                dif_val = weights_lshade(delta_k);
-
-                %% for updating the memory of scaling factor
-                memory_sf(memory_pos) = (dif_val' * (suc_f .^2 )) / (dif_val' * suc_f);
-
-                %% for updating the memory of crossover rate
-                %TODO 为什么会存在suc_cr 等于0 的情况?
-                if max(suc_cr) == 0 || memory_scr(memory_pos) == -1
-                    memory_scr(memory_pos) = -1;
-                else
-                    memory_scr(memory_pos) = (dif_val' * (suc_cr.^2)) / (dif_val' * suc_cr);
-                end
-
-                memory_pos = memory_pos + 1;
-
-                if memory_pos > memory_size
-                    memory_pos = 1;
-                end
-
-            end
+            [memory_sf,memory_scr,memory_pos] = update_memory(suc_f,suc_cr,memory_sf,memory_scr,memory_size,memory_pos,delta_k);
 
             %% resize the population size of pop_ec and pop_fr
-            % TODO 如果同时对连个子种群施加LSPR这样的变化是否太大了？
-            pop_ec = resize_pop(max_popsize,min_popsize,pop_ec,max_nfes,nfes);
-            pop_fr = resize_pop(max_popsize,min_popsize,pop_fr,max_nfes,nfes);
+            % TODO 如果同时对两个子种群施加LSPR这样的变化是否太大了？
+            pop_ec_struct = resize_pop(max_popsize,min_popsize,pop_ec_struct,max_nfes,nfes);
+            pop_fr_struct = resize_pop(max_popsize,min_popsize,pop_fr_struct,max_nfes,nfes);
             
-            %[pop_fr,pop_ec, delete_individual] = subpop_com(pop_fr,pop_ec,archive_fr,archive_ec)
-            [pop_fr,pop_ec,delete_individuald] = subpop_com(pop_fr,pop_ec,archive_fr,archvie_ec);
-            archive = [archive; delete_individuald];
-            
-            archive.NP = round(arc_rate * (pop_ec + pop_fr));
+           
+            [pop_fr_struct,pop_ec_struct,delete_individuald] ...
+                = subpop_com(pop_fr_struct,pop_ec_struct, ...
+                  archive_fr,archive_ec,epsilon);
+              
+            archive.pop = [archive.pop; delete_individuald];
+            archive.NP = round(arc_rate * (pop_ec_struct.popsize + pop_fr_struct.popsize));
 
             if size(archive.pop, 1) > archive.NP
                rndpos = randperm(size(archive.pop, 1));
@@ -252,27 +199,46 @@ for func = 1:28
             end
             
             % CMA parameters update epsilon update
-            pop_fr = update_cma(pop_fr, cma,nfes);
-            pop_ec = update_cma(pop_ec, cma,nfes);
+            pop_fr_struct = update_cma(pop_fr_struct, cma,nfes);
+            pop_ec_struct = update_cma(pop_ec_struct, cma,nfes);
             
-            epsilon = update_epsilon(epsilon_zero, nfes,  fes_control,cp);
+            epsilon = update_epsilon(epsilon_zero, nfes,fes_control,cp);
             
+            %% update best so far solution
+            % TODO conv 可能小于0 ??
+            k = 1;
+            while k < pop_fr_struct.popsize && k < pop_ec_struct.popsize
+                off_fr = pop_fr(k,:);
+                off_ec = pop_ec(k,:);
+                % better in conv
+                if off_fr(end) < bsf_solution(end)
+                    bsf_solution = off_fr;
+                % equal conv better in fitness
+                elseif off_fr(end) == bsf_solution(end) && off_fr(end-1) < bsf_solution(end-1)
+                    bsf_solution = off_fr;
+                end
+                
+                % better in conv
+                if off_ec(end) < bsf_solution(end)
+                    bsf_solution = off_ec;
+                % equal conv better in fitness
+                elseif off_ec(end) == bsf_solution(end) && off_ec(end-1) < bsf_solution(end-1)
+                    bsf_solution = off_ec;
+                end
+                k =k +1;
+            end
+            
+            if nfes % 10000 == 0
+                fprintf('process  ------- %f\n' ,nfes/max_nfes);      
+            end
         end % end of while
-
-%         bsf_error_val = bsf_fit_var - optimum;
-% 
-%         if bsf_error_val < val_2_reach
-%             bsf_error_val = 0;
-%         end
-% 
-%         fprintf('%d th run, best-so-far error value = %1.8e\n', run_id, bsf_error_val)
-%         outcome = [outcome bsf_error_val];
-        
+        fprintf('run= %d, fitness = %d\n, conv = %d\n' ,run_id,bsf_solution(end-1),bsf_solution(end));
+               
        end %% end 1 run
     
     end %% end of iterate one problem size
    
 
     fprintf('\n')
-    fprintf('mean error value = %1.8e, std = %1.8e\n', mean(outcome), std(outcome))
+%     fprintf('mean error value = %1.8e, std = %1.8e\n', mean(outcome), std(outcome))
 end %% end 1 function run

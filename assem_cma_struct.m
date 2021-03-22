@@ -20,9 +20,10 @@ function cma = assem_cma_struct(lu,problem_size,p_best_rate,popsize)
     %   1) top p% of population based on feasibility or constraint violation  in LSHADE framework
     %   2) used in CMA to update xmean and some other parameters
     mu = p_best_rate * popsize; 
-    cma.mu = mu;
     weights = log(mu + 1/2) - log(1:mu); % 1 * mu  vector for weighted recombination
     weights = weights / sum(weights); 
+    mu = floor(mu);
+    cma.mu = mu;
     cma.weights = weights;
     mueff = sum(weights)^2 / sum(weights.^2); % variance-effectiveness of sum w_i x_i
     cma.mueff = mueff;
@@ -36,8 +37,8 @@ function cma = assem_cma_struct(lu,problem_size,p_best_rate,popsize)
     cma.damps = 1 + 2 * max(0, sqrt((mueff - 1) / (problem_size + 1)) - 1) + cs; % damping for sigma  usually close to 1
         
     % Initialize dynamic (internal) strategy parameters and constants
-    cma.pc = zeros(problem_size, 1);  % Note: pc and ps are column vector
-    cma.ps = zeros(problem_size, 1); % evolution paths for C and sigma
+    cma.pc = zeros(1, problem_size);  
+    cma.ps = zeros(1, problem_size); % evolution paths for C and sigma
     
     % expectation of ||N(0,I)|| == norm(randn(N,1))
     cma.chiN = problem_size^0.5 * (1 - 1 / (4 * problem_size) + 1 / (21 * problem_size^2)); 

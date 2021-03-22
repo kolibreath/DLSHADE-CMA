@@ -1,4 +1,4 @@
-function [pop, archive, suc_f, suc_cr, delta_k] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr)
+function [pop, archive, suc_f, suc_cr, delta_k] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr,delta_k)
 % REPLACE_RECORD replace defeated parent into archive and record successful
 % input: 
     % pop       -- population
@@ -14,6 +14,7 @@ function [pop, archive, suc_f, suc_cr, delta_k] = replace_record(pop,k,cur_off,a
     % archive   -- archive saving defeating parents
     % suc_f     -- storing successful scale factor f
     % suc_cr    -- storing successful crossover rate cr
+    % delta_k   -- updated delta_k (append a new row of fitness and conv improvement)
     
 % Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
 
@@ -22,12 +23,13 @@ function [pop, archive, suc_f, suc_cr, delta_k] = replace_record(pop,k,cur_off,a
     % their parent but defeated in Deb's feasibility rule selection 
 % scale factor F and crossover rate cr
   pop(k, :) = cur_off;
-  archive = [archive; cur_par];
+  archive.pop = [archive.pop; cur_par];
   % record successful f and cr
   suc_f = [suc_f; f(k)];
   suc_cr = [suc_cr;cr(k)];
   
   % delta_k(par_conv, par_fit, off_conv, off_fit)
-  delta_k = [];
-  delta_k = [delta_k; delta_k(cur_par(end),cur_par(end-1),cur_off(end),cur_par(end-1))];
+  delta_fitness = max(cur_par(end-1) - cur_off(end-1), 0);
+  delta_conv    = max(cur_par(end) - cur_off(end), 0);
+  delta_k =  [delta_k;[delta_fitness, delta_conv]];
 end

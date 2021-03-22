@@ -1,9 +1,9 @@
-function [pop] = resize_pop(max_popsize,min_popsize,pop,max_nfes,nfes)
+function pop_struct = resize_pop(max_popsize,min_popsize,pop_struct,max_nfes,nfes)
 %RESIZE_POP resize population using LSPR strategy
 % input:
     % max_popsize           -- maximum popsize of pop
     % min_popsize           -- minimum popsize of pop
-    % pop                   -- population (pop_fr, pop_ec)
+    % pop_struct            -- population struct
     % max_nfes              -- maximum of function evaluation
     % nfes                  -- current funciton evaluation
     % archive               -- archive of eliminated individuals
@@ -20,16 +20,17 @@ function [pop] = resize_pop(max_popsize,min_popsize,pop,max_nfes,nfes)
 % Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
 
 %% for resizing the population size
+    pop = pop_struct.pop;
     plan_popsize = round((((min_popsize - max_popsize) / max_nfes) * nfes) + max_popsize);
-    popsize = pop.popsize;
+    popsize = pop_struct.popsize;
     if popsize > plan_popsize
        % prevent popsize after resize is smaller than min_popsize
        reduction_ind_num = min(popsize - plan_popsize, popsize - min_popsize);
        popsize = popsize - reduction_ind_num;
-       pop.popsize = popsize;
+       pop_struct.popsize = popsize;
 
        % find PFS
-       % TODO 使用这样的方式是否可行?
+       % TODO 使用pfs这样的方式是否可行?
        feasible_nums = length(find(pop(end) == 0));
        pfs = feasible_nums / popsize;
        
@@ -47,5 +48,6 @@ function [pop] = resize_pop(max_popsize,min_popsize,pop,max_nfes,nfes)
        end
 
     end
+    pop_struct.pop = pop;
 end
 
