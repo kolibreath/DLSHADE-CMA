@@ -20,6 +20,8 @@ function pop_struct = resize_pop(max_popsize,min_popsize,pop_struct,max_nfes,nfe
 % Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
 
 %% for resizing the population size
+    
+    
     pop = pop_struct.pop;
     plan_popsize = round((((min_popsize - max_popsize) / max_nfes) * nfes) + max_popsize);
     popsize = pop_struct.popsize;

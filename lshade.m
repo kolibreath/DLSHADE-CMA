@@ -163,7 +163,6 @@ for func = 1:28
             
             nfes = nfes + pop_fr_struct.popsize + pop_ec_struct.popsize;
 
-            %% update parent population TODO 查看是否协会结构体
             % updated subpopulations stored in structs
             [pop_fr_struct,archive_fr,archive,suc_f_fr,suc_cr_fr,delta_k_fr] = update_pop_fr(pop_fr_struct,ui_fr,archive,f_fr,cr_fr);
             [pop_ec_struct,archive_ec,archive,suc_f_ec,suc_cr_ec,delta_k_ec] = update_pop_ec(pop_ec_struct,ui_ec,archive,f_ec,cr_ec,epsilon);
@@ -174,7 +173,6 @@ for func = 1:28
             suc_cr = [suc_cr_fr;suc_cr_ec];
             
             %TODO remove useless variables
-       
             %% update f and cr memory
             [memory_sf,memory_scr,memory_pos] = update_memory(suc_f,suc_cr,memory_sf,memory_scr,memory_size,memory_pos,delta_k);
 

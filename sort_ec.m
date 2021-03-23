@@ -15,6 +15,8 @@ function sorted_ec = sort_ec(pop, epsilon)
     
     %TODO further check here!
     conv = pop(:, end);
+    
+    [popsize,columns] = size(pop);
 
     % surely conv of feasible individuals is less than infeasible ones
     feasible_index = find(conv == 0);
@@ -60,32 +62,45 @@ function sorted_ec = sort_ec(pop, epsilon)
             % pass feasible and epsilon_feasible index and make following code run faster
             conv_copy = conv;
             delete_index = find(conv < epsilon); % feasible and epsilon-feasible
-            conv_copy(delete_index) = -1; 
+            conv_copy(delete_index) = inf; 
             len = length(conv_copy);
-
+            
+            % Radix sort: 1) ascend conv 2) ascend fitness
             for dupli = duplicate_conv
+                temp = [];
                 for i = 1:len
-                    if conv_copy(i) == -1; continue; end
+                    if conv_copy(i) == inf; continue; end  % pass feasible and epsilon-feasible for higher speed
                     if dupli == conv_copy(i)
-                        epsilon_infeasible_equal_individuals = [epsilon_infeasible_equal_individuals; pop(i)];
+                        temp = [temp; pop(i,:)];
                         epsilon_infeasible_equal_index = [epsilon_infeasible_equal_index; i]; 
                     end
                 end
-                % based on fitness
-                [~, sorted_index] = sort(epsilon_infeasible_equal_individuals(:,end - 1), 'ascend');
-                epsilon_infeasible_equal_individuals = epsilon_infeasible_equal_individuals(sorted_index,:);
+                % sort temp based on fitness
+                temp = sortrows(temp, columns-1);
+                epsilon_infeasible_equal_individuals = [epsilon_infeasible_equal_individuals;temp];
             end
         end
     end
     
     % otherwise
     selected_index = [feasible_index; epsilon_feasible_index; epsilon_infeasible_equal_index];
+    % check unique
+    uniq = length(selected_index) - length(unique(selected_index));
+    if uniq ~= 0
+        ME = MException("duplicates in selected index");
+        throw(ME);
+    end
+    
     pop(selected_index,:) = [];
     % based on conv
-    [pop, ~] = sort(pop(:,end), 'ascend');
+    pop = sortrows(pop,columns);
 
     % combine all the index from the best to worse:
     % absolutely feasible, epsilon_feasible, epsilon_infeasible but have
     % equal conv, otherwise
-    sorted_ec = [feasible_individuals;epsilon_feasible_individuals;epsilon_infeasible_equal_individuals;pop];
+    try
+        sorted_ec = [feasible_individuals;epsilon_feasible_individuals;epsilon_infeasible_equal_individuals;pop];
+    catch exception
+        sorted_ec = [];
+    end
 end

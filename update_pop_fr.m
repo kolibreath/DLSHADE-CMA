@@ -53,14 +53,14 @@ function [pop_struct, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_f
        par_conv = cur_par(end);
        off_conv = cur_off(end);
        
-       %% between two infeasible solutions, the one with smaller smaller conV wins
+       %% between two infeasible solutions, the one with smaller conV wins
        if par_conv ~=0 && off_conv ~= 0
           if par_conv > off_conv
              %parent is defeated
              [pop,archive,suc_f,suc_cr, delta_k] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr,delta_k);
           else
               % ui is defeated 
-              [archive_fr, archive_frofi] = save_archive(archive_fr, archive_frofi, cur_par, cur_off);
+             [archive_fr, archive_frofi] = save_archive(archive_fr, archive_frofi, cur_par, cur_off);
           end
        %% if both feasible, better fitness is preferred
        elseif par_conv == 0 && off_conv == 0
@@ -86,8 +86,10 @@ function [pop_struct, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_f
     %% applying FROFI replacement strategy
     [length,~] = size(archive_frofi);
     if length ~= 0
-        pop_struct = replacement(pop_struct, archive_frofi);
+        pop = replacement(pop_struct, archive_frofi);
     end
+    
+    pop_struct.pop = pop;  % rewrite updated population into pop_struct
 end
     
 
@@ -115,10 +117,10 @@ end
 function  pop = replacement(pop_struct,archive_frofi)
 % FRORI replacement strategy
 % input:
-    % pop             -- population struct
+    % pop_struct      -- population struct
     % archive_frofi   -- defeated individual but have better fitness than parent
 % output:
-    % pop_struct      -- updated population struct
+    % pop            -- updated population 
 
 %%
  % calculate the size of the population p(popsize) and the number of dimensions(n) of
@@ -175,7 +177,5 @@ function  pop = replacement(pop_struct,archive_frofi)
      end   
   end
  end
- 
- pop_struct.pop = pop;
 
 end
