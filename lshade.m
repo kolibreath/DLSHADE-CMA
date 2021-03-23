@@ -46,7 +46,7 @@ for func = 1:28
       for run_id = 1:1
         
         lu = decision_range(func, problem_size)';  % 2 * problem_size matrix
-        max_nfes = 10000 * problem_size;
+        max_nfes = 1000* problem_size^problem_size;
         nfes = 0;
         
         %% PARAMETER SETTINGS FOR FROFI
@@ -57,7 +57,7 @@ for func = 1:28
         p_best_rate = 0.11;
         arc_rate = 1.4;         % archive for saving defeated parents
         memory_size = 5;        % memory for successful F and CR
-        popsize = 18 * problem_size;
+        popsize = 200; % TODO free from problem_size
         
         %% PARAMETER SETTINGS FOR LINEAR POPULATION SIZE REDUCTION (LSPR)
         max_popsize = popsize;
@@ -132,7 +132,8 @@ for func = 1:28
         nfes = nfes + popsize;
         
         %% INITIALIZATION FOR EPSILON-CONSTRAINT
-        theta = floor(0.05 * pop_ec_struct.popsize);   % conv of the theta-th individual selected as epsilon_zero
+        % TODO 测试种群合适的大小 为什么协方差矩阵会劣化
+        theta = floor(0.5 * pop_ec_struct.popsize);   % conv of the theta-th individual selected as epsilon_zero
         sorted_conv = sort(pop_ec(:, end), 'ascend');
         epsilon_zero = sorted_conv(theta);
         epsilon = max(max(pop_fr(:, end)), max(pop_ec(:, end)));
