@@ -13,6 +13,7 @@ function ui = gnOffspring(pop_struct,lu,archive,p_best_rate,f,cr)
 % Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
 
     %% DE/current-to-pbest mutation and crossover
+    % 生成的pbetter应该是通过多元正态分布生成的个体！！！！！
     pop = pop_struct.pop;
     popsize = pop_struct.popsize;
     problem_size = pop_struct.problem_size;

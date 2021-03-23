@@ -36,14 +36,14 @@ function pop_struct = update_cma(pop_struct,cma,nfes)
     pop_struct.sigma = pop_struct.sigma * exp((cma.cs / cma.damps) * (norm(pop_struct.ps) / cma.chiN - 1));
     
     %TODO check here how to achieve O(N^2)
-%     if nfes - pop.eigenval > pop.popsize / (cma.c1 + cma.cmu) / pop.problem_size / 10
-%     end  
+    if nfes - pop_struct.eigeneval > pop_struct.popsize / (cma.c1 + cma.cmu) / pop_struct.problem_size / 10
+        pop_struct.eigeneval  = nfes;
+        pop_struct.C = triu(pop_struct.C) + triu(pop_struct.C, 1)';
+        [pop_struct.B,pop_struct.D] = eig(pop_struct.C);
+        pop_struct.D = sqrt(diag(pop_struct.D));
+        pop_struct.invsqrtC = pop_struct.B * diag(pop_struct.D .^ -1) * pop_struct.B';
+    end   
     
-    pop_struct.eigenval  = nfes;
-    pop_struct.C = triu(pop_struct.C) + triu(pop_struct.C, 1)';
-    [pop_struct.B,pop_struct.D] = eig(pop_struct.C);
-    pop_struct.D = sqrt(diag(pop_struct.D));
-    pop_struct.invsqrtC = pop_struct.B * diag(pop_struct.D .^ -1) * pop_struct.B';
 end
 
 

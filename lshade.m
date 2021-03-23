@@ -33,7 +33,7 @@ for func = 1:28
 
     
     %% for each problem size
-    for dim_num = 2:2
+    for dim_num = 1:1
       problem_size = Dimension_size(dim_num);
       initial_flag = 0;
       fprintf('Function = %d, Dimension size = %d\n', func, problem_size)
@@ -51,7 +51,6 @@ for func = 1:28
         
         %% PARAMETER SETTINGS FOR FROFI
         %% PARAMETER SETTINGS FOR EPSILON CONSTRAINTS
-        epsilon = 0;
         cp = 5; 
         fes_control = 0.2 * max_nfes;
         %% PARAMETER SETTINGS FOR LSHADE
@@ -184,7 +183,12 @@ for func = 1:28
             pop_ec_struct = resize_pop(max_popsize,min_popsize,pop_ec_struct,max_nfes,nfes);
             pop_fr_struct = resize_pop(max_popsize,min_popsize,pop_fr_struct,max_nfes,nfes);
             
-           
+            % popsize decrease, and mu in cma struct should decrease, and update cma.weights
+            cma.mu = min(pop_ec_struct.popsize,pop_fr_struct.popsize) * p_best_rate;
+            cma.weights = log(cma.mu + 1/2) - log(1:cma.mu);
+            cma.weights = cma.weights / sum(cma.weights);
+            cma.mu = floor(cma.mu);
+
             [pop_fr_struct,pop_ec_struct,delete_individuald] ...
                 = subpop_com(pop_fr_struct,pop_ec_struct, ...
                   archive_fr,archive_ec,epsilon);
