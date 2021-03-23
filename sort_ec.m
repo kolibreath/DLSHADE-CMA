@@ -98,9 +98,5 @@ function sorted_ec = sort_ec(pop, epsilon)
     % combine all the index from the best to worse:
     % absolutely feasible, epsilon_feasible, epsilon_infeasible but have
     % equal conv, otherwise
-    try
-        sorted_ec = [feasible_individuals;epsilon_feasible_individuals;epsilon_infeasible_equal_individuals;pop];
-    catch exception
-        sorted_ec = [];
-    end
+    sorted_ec = [feasible_individuals;epsilon_feasible_individuals;epsilon_infeasible_equal_individuals;pop];
 end

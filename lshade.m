@@ -154,8 +154,8 @@ for func = 1:28
             [f_ec, cr_ec] = gnFCR(pop_ec_struct.popsize,memory_size,memory_sf,memory_scr);
             
             % Note: ui_fr and ui_ec are un-evaluated matrix (popsize * problem_size)
-            ui_fr = gnOffspring(pop_fr_struct,lu,archive,p_best_rate,f_fr,cr_fr);
-            ui_ec = gnOffspring(pop_ec_struct,lu,archive,p_best_rate,f_ec,cr_ec);
+            ui_fr = gnOffspring(pop_fr_struct,lu,archive,nfes,max_nfes,f_fr,cr_fr);
+            ui_ec = gnOffspring(pop_ec_struct,lu,archive,nfes,max_nfes,f_ec,cr_ec);
 
             % evaluate offspring populations of subpopulations
             ui_fr = evalpop(ui_fr, func);
@@ -230,7 +230,7 @@ for func = 1:28
                 k =k +1;
             end
             
-            if nfes % 10000 == 0
+            if mod(nfes,500) == 0
                 fprintf('process  ------- %f\n' ,nfes/max_nfes);      
             end
         end % end of while

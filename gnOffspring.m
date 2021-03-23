@@ -1,10 +1,9 @@
-function ui = gnOffspring(pop_struct,lu,archive,p_best_rate,f,cr)
+function ui = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
 %GNOFFSPRING generate offspring by DE/current-to-pbetter*/
 % input:
     % pop                   -- population of individuals (pop_fr or pop_ec)
     % lu                    -- lower and upper bounds 
     % archive               -- archvie stores defeated parents
-    % p_best_rate           -- top p% best from population
     % f                     -- generated scale factor f
     % cr                    -- generated crossover rate cr
 % output:
@@ -32,7 +31,7 @@ function ui = gnOffspring(pop_struct,lu,archive,p_best_rate,f,cr)
     end
     
     %TODO 添加ranking 根据迭代的情况采用 linear rank selection 或者是exponential
-
+    
     % mutation
     r0 = [1:popsize];
     popAll = [pop; archive.pop];
@@ -44,9 +43,10 @@ function ui = gnOffspring(pop_struct,lu,archive,p_best_rate,f,cr)
           * pop_struct.B * (pop_struct.D .* randn(problem_size, 1)))';
     popAll = popAll(:,1:problem_size);
     
-    vi = pop + f(: , ones(1, problem_size)) .* (pbetter(:,1:problem_size) ...
-             - pop(:,1:problem_size)...
-             + pop(r1, :) - popAll(r2, :));
+    f_w = gnFw(nfes,max_nfes,f);
+    vi = pop + f_w(: , ones(1, problem_size)) .* (pbetter(:,1:problem_size) ...
+             - pop(:,1:problem_size))...
+             + f(: , ones(1, problem_size)).* (pop(r1, :) - popAll(r2, :));
     vi = boundConstraint(vi, pop, lu);
 
     % crossover
@@ -56,4 +56,15 @@ function ui = gnOffspring(pop_struct,lu,archive,p_best_rate,f,cr)
     ui = vi; 
     ui(mask) = pop(mask);
 end
+
+function f_w = gnFw(nfes,max_nfes,f)
+    if nfes <= floor(0.2 * max_nfes)
+        f_w = 0.7*f;
+    elseif nfes > floor(0.2 * max_nfes) && nfes <= floor(0.4 * max_nfes)
+        f_w = 0.8*f;
+    else
+        f_w = 1.2*f;
+    end
+end
+
 
