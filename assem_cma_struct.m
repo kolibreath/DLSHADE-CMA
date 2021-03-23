@@ -1,4 +1,4 @@
-function cma = assem_cma_struct(lu,problem_size,p_best_rate,popsize)
+function cma = assem_cma_struct(problem_size,p_best_rate,popsize)
 %ASSEM_CMA_STRUCT construct a struct stores CMA related constants
 % input:
     % lu            -- lower and upper bounds of problem
@@ -9,10 +9,9 @@ function cma = assem_cma_struct(lu,problem_size,p_best_rate,popsize)
     % cma           -- construct CMA related information into cma (struct)
 % Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/20
     %% 
-    cma = [];
     % Note: compare to xmean in pop struct, what 'xmean','sigma' variable here is closer to a 'global variable'
     % 'xmean' etc. in pop struct will adapt themselves, and 'xmean' etc. remain unchanged
-    cma.xmean = (lu(1,:) + lu(2,:)) ./ 2;  % mean value of Gaussian distribution, middle of upper and lower bounds
+    cma.xmean = rand(1, problem_size);  
     cma.sigma = 0.3;                       % step size of Gaussian distribution
     %TODO CMA-ES原算法中有stop condition 之后测试一下需不需要加上！
     cma.stopfitness = 1e-10;

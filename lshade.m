@@ -64,7 +64,7 @@ for func = 1:28
         min_popsize = 4.0;
         
         %% PARAMETER SETTINGS FOR COVARIANCE ADAPTATION MATIRX (CMA)
-        cma = assem_cma_struct(lu, problem_size,p_best_rate,popsize);
+        cma = assem_cma_struct(problem_size,p_best_rate,popsize);
         
         %% PARAMETER SETTTINGS FOR COVARIANCE MATRIX ADAPTATION 
         % Note: subpopulations evolve these parameters seperately
@@ -78,7 +78,7 @@ for func = 1:28
         eigeneval = 0; % track update of B and D
         
 
-        %% Initialize the population
+        %% INTIIALIZE THE POPULATION
         % individual in population will be viewed as (problem_size + 4) * 1 vector
         % the additional 4 'elements' are [g, h, f, conV] 
    

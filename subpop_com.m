@@ -23,9 +23,6 @@ function [pop_fr_struct,pop_ec_struct, delete_individual] = subpop_com(pop_fr_st
     union_fr = [pop_fr; archive_ec];
     union_ec = [pop_ec; archive_fr];
     
-    [len_union_fr, ~] = size(union_fr);
-    [len_union_ec, ~] = size(union_ec);
-    
     sorted_union_fr = sort_fr(union_fr);
     sorted_union_ec = sort_ec(union_ec,epsilon);
     
@@ -34,8 +31,8 @@ function [pop_fr_struct,pop_ec_struct, delete_individual] = subpop_com(pop_fr_st
     pop_ec = sorted_union_ec(1:pop_ec_struct.popsize,:);
     
     % deleted 
-    delete_individual = sorted_union_fr(pop_fr_struct.popsize+1:len_union_fr,:);
-    delete_individual = [delete_individual;sorted_union_ec(pop_ec_struct.popsize+1:len_union_ec,:)];
+    delete_individual = sorted_union_fr(pop_fr_struct.popsize+1:end,:);
+    delete_individual = [delete_individual;sorted_union_ec(pop_ec_struct.popsize+1:end,:)];
     
     pop_fr_struct.pop = pop_fr;
     pop_ec_struct.pop = pop_ec;

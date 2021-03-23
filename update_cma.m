@@ -44,6 +44,8 @@ function pop_struct = update_cma(pop_struct,cma,nfes)
         pop_struct.invsqrtC = pop_struct.B * diag(pop_struct.D .^ -1) * pop_struct.B';
     end   
     
+    % TODO update weights
+    
 end
 
 

@@ -32,11 +32,6 @@ function ui = gnOffspring(pop_struct,lu,archive,p_best_rate,f,cr)
     end
     
     %TODO 添加ranking 根据迭代的情况采用 linear rank selection 或者是exponential
-    %top p%
-    pNP = max(round(popsize*p_best_rate), 2); %% choose at least two best solutions
-    randindex = ceil(rand(1, popsize) .* pNP); %% select from [1, 2, 3, ..., pNP]
-    randindex = max(1, randindex); %% to avoid the problem that rand = 0 and thus ceil(rand) = 0
-    pbest = pop(randindex, :); %% randomly choose one of the top 100p% solutions TODO 这个应该是排序之后的选择，检查！
 
     % mutation
     r0 = [1:popsize];
@@ -45,10 +40,11 @@ function ui = gnOffspring(pop_struct,lu,archive,p_best_rate,f,cr)
     
     % these variable just copies of those outside this function scope
     pop = pop(:,1:problem_size);
-    pbest = pbest(:,1:problem_size);
+    pbetter = (pop_struct.xmean' + pop_struct.sigma ...
+          * pop_struct.B * (pop_struct.D .* randn(problem_size, 1)))';
     popAll = popAll(:,1:problem_size);
     
-    vi = pop + f(: , ones(1, problem_size)) .* (pbest(:,1:problem_size) ...
+    vi = pop + f(: , ones(1, problem_size)) .* (pbetter(:,1:problem_size) ...
              - pop(:,1:problem_size)...
              + pop(r1, :) - popAll(r2, :));
     vi = boundConstraint(vi, pop, lu);
