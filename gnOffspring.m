@@ -47,9 +47,10 @@ function ui = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
     popAll = popAll(:,1:problem_size);
     
     f_w = gnFw(nfes,max_nfes,f);
-    vi = pop + f_w(: , ones(1, problem_size)) .* (pbetter(:,1:problem_size) ...
-              - pop(:,1:problem_size))...
-              + f(: , ones(1, problem_size)).* (pop(r1, :) - popAll(r2, :));
+%     vi = pop + f_w(: , ones(1, problem_size)) .* (pbetter(:,1:problem_size) ...
+%               - pop(:,1:problem_size))...
+%               + f(: , ones(1, problem_size)).* (pop(r1, :) - popAll(r2, :));
+    vi = pbetter;
     vi = boundConstraint(vi, pop, lu);
 
     % crossover
