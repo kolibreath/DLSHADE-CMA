@@ -46,7 +46,7 @@ for func = 1:28
       for run_id = 1:1
         
         lu = decision_range(func, problem_size)';  % 2 * problem_size matrix
-        max_nfes = 1000* problem_size^problem_size;
+        max_nfes = 10000* problem_size;
         nfes = 0;
         
         %% PARAMETER SETTINGS FOR FROFI
