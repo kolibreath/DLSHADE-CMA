@@ -34,6 +34,7 @@ function [pop_fr_struct,pop_ec_struct, delete_individual] = subpop_com(pop_fr_st
     delete_individual = sorted_union_fr(pop_fr_struct.popsize+1:end,:);
     delete_individual = [delete_individual;sorted_union_ec(pop_ec_struct.popsize+1:end,:)];
     
+    %TODO 这里两个种群是否交换了？ 是否删除了不要的解
     pop_fr_struct.pop = pop_fr;
     pop_ec_struct.pop = pop_ec;
 end

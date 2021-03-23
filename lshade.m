@@ -21,7 +21,10 @@ global initial_flag ; % for CEC2017 test function evaluation
 
 rand('seed', sum(100 * clock));
 
+global TEST_GEN_OFF;
+
 for func = 1:28
+    TEST_GEN_OFF = 2;
     optimum = func * 100.0;
     %% PARAMETER SETTINGS FOR PROBLEM SIZE
     Dimension_size = [10, 30, 50, 100];
@@ -46,7 +49,7 @@ for func = 1:28
       for run_id = 1:1
         
         lu = decision_range(func, problem_size)';  % 2 * problem_size matrix
-        max_nfes = 1000* problem_size^problem_size;
+        max_nfes = 10000* problem_size;
         nfes = 0;
         
         %% PARAMETER SETTINGS FOR FROFI
@@ -147,6 +150,10 @@ for func = 1:28
         archive.pop = zeros(0, problem_size); % the solutions stored in te archive
         archive.funvalues = zeros(0, 1); % the function value of the archived solutions
 
+        % there is no need for pop_fr and pop_ec outside of their structs, delete them LOL
+        clear pop_ec;
+        clear pop_fr;
+        
         %% main loop
         while nfes < max_nfes
       
@@ -163,7 +170,8 @@ for func = 1:28
             ui_ec = evalpop(ui_ec, func);
             
             nfes = nfes + pop_fr_struct.popsize + pop_ec_struct.popsize;
-
+            
+            
             % updated subpopulations stored in structs
             [pop_fr_struct,archive_fr,archive,suc_f_fr,suc_cr_fr,delta_k_fr] = update_pop_fr(pop_fr_struct,ui_fr,archive,f_fr,cr_fr);
             [pop_ec_struct,archive_ec,archive,suc_f_ec,suc_cr_ec,delta_k_ec] = update_pop_ec(pop_ec_struct,ui_ec,archive,f_ec,cr_ec,epsilon);
@@ -202,8 +210,9 @@ for func = 1:28
             end
             
             % CMA parameters update epsilon update
-            pop_fr_struct = update_cma(pop_fr_struct, cma,nfes);
-            pop_ec_struct = update_cma(pop_ec_struct, cma,nfes);
+            % TEST
+%             pop_fr_struct = update_cma(pop_fr_struct, cma,nfes);
+%             pop_ec_struct = update_cma(pop_ec_struct, cma,nfes);
             
             epsilon = update_epsilon(epsilon_zero, nfes,fes_control,cp);
             
@@ -211,8 +220,8 @@ for func = 1:28
             % TODO conv 可能小于0 ??
             k = 1;
             while k < pop_fr_struct.popsize && k < pop_ec_struct.popsize
-                off_fr = pop_fr(k,:);
-                off_ec = pop_ec(k,:);
+                off_fr = pop_fr_struct.pop(k,:);
+                off_ec = pop_ec_struct.pop(k,:);
                 % better in conv
                 if off_fr(end) < bsf_solution(end)
                     bsf_solution = off_fr;
