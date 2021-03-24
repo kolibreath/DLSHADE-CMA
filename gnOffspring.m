@@ -51,7 +51,16 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
     f_w = gnFw(nfes,max_nfes,f);
     vi = base_vectors + f_w(: , ones(1, problem_size)) .* (pbetter - base_vectors)...
        + f(: , ones(1, problem_size)).* (pop(r1, :) - popAll(r2, :));
-    vi = boundConstraint(vi,pop,r0,lu);
+   
+    if sum(sum(isnan(vi))) 
+                disp('fuck');
+    end
+     
+   vi = boundConstraint(vi,pop,r0,lu);
+    
+     if sum(sum(isnan(vi))) 
+                disp('fuck');
+     end
 
     % mutation without CMA-ES
 %     pNP = max(round(popsize*0.11), 2); %% choose at least two best solutions
@@ -80,7 +89,10 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
     jrand = sub2ind([lambda problem_size], rows, cols); mask(jrand) = false;
     ui = vi; 
     ui(mask) = base_vectors(mask);
-   
+    if sum(sum(isnan(ui))) 
+                disp('fuck');
+    end
+
 end
 
 function f_w = gnFw(nfes,max_nfes,f)

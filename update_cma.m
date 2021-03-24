@@ -18,8 +18,11 @@ function [pop_struct,cma]= update_cma(pop_struct,nfes)
     % the fastest way is to reinitialized the cma struct with 'new' mu
     cma = assem_cma(problem_size,popsize);
     
-    pop_struct.xmean =  (cma.weights)* pop(1:cma.mu, 1:pop_struct.problem_size); 
-    
+    try
+        pop_struct.xmean =  (cma.weights)* pop(1:cma.mu, 1:pop_struct.problem_size); 
+    catch e
+        disp('fuck');
+    end 
     % update evolution paths
     pop_struct.ps = (1 - cma.cs) * pop_struct.ps ...
              + sqrt(cma.cs * (2 - cma.cs) * cma.mueff) * (pop_struct.xmean - xold) ... 

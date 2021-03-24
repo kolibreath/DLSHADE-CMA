@@ -7,17 +7,19 @@ function vi = boundConstraint (vi,pop,r0,lu)
 % Written by Jingqiao Zhang, jingqiao@gmail.com
 % Modified by Shi Zeyuan, 734780178@qq.com Date: 03/24/2021
 
-    [NP, D] = size(pop);  % the population size and the problem's dimension
+    [NP, ~] = size(pop);  % the population size and the problem's dimension
     
     % if violated set a random value in the lower and upper bounds
     %% check the lower bound
     xl = repmat(lu(1, :), NP*2, 1);
     pos = vi < xl;
-    vi(pos) = (pop(r0(pos)) + xl(pos)) / 2;
+    pop = pop(r0,:);
+    vi(pos) = (pop(pos) + xl(pos)) / 2;
 
     %% check the upper bound
     xu = repmat(lu(2, :), NP*2, 1);
     pos = vi > xu;
-    vi(pos) = (pop(r0(pos)) + xu(pos)) / 2;
+    pop = pop(r0,:);
+    vi(pos) = (pop(pos) + xu(pos)) / 2;
 
 end

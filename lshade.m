@@ -152,6 +152,8 @@ for func = 1:28
             [ui_fr,base_fr] = gnOffspring(pop_fr_struct,lu,archive,nfes,max_nfes,f_fr,cr_fr);
             [ui_fo,base_fo] = gnOffspring(pop_fo_struct,lu,archive,nfes,max_nfes,f_fo,cr_fo);
 
+           
+            
             %% evaluate offspring populations of subpopulations
             ui_fr = evalpop(ui_fr, func);
             ui_fo = evalpop(ui_fo, func);
@@ -180,10 +182,10 @@ for func = 1:28
                   archive_fr,archive_fo);
               
             % TODO 如果同时对两个子种群施加LSPR这样的变化是否太大了？
-            pop_fo_struct = resize_pop(max_popsize,min_popsize,pop_fo_struct,max_nfes,nfes);
-            pop_fr_struct = resize_pop(max_popsize,min_popsize,pop_fr_struct,max_nfes,nfes);
-
-              
+%             pop_fo_struct = resize_pop(max_popsize,min_popsize,pop_fo_struct,max_nfes,nfes);
+%             pop_fr_struct = resize_pop(max_popsize,min_popsize,pop_fr_struct,max_nfes,nfes);
+% 
+%               
             archive.pop = [archive.pop; delete_individuald];
             archive.NP = round(arc_rate * (pop_fo_struct.popsize + pop_fr_struct.popsize));
 
@@ -194,7 +196,11 @@ for func = 1:28
             end
 
             % CMA parameters update 
-            [pop_fr_struct] = update_cma(pop_fr_struct,nfes);
+            try
+                [pop_fr_struct] = update_cma(pop_fr_struct,nfes);
+            catch e
+                disp(e);
+            end
             [pop_fo_struct] = update_cma(pop_fo_struct,nfes);
 
             %% update best so far solution
