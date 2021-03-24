@@ -151,21 +151,19 @@ for func = 1:28
             [f_fo, cr_fo] = gnFCR(pop_fo_struct.popsize,memory_size,memory_sf,memory_scr);
             
             % Note: ui_fr and ui_fo are un-evaluated matrix (lambda * problem_size)
-            ui_fr = gnOffspring(pop_fr_struct,lu,archive,nfes,max_nfes,f_fr,cr_fr);
-            ui_fo = gnOffspring(pop_fo_struct,lu,archive,nfes,max_nfes,f_fo,cr_fo);
+            [ui_fr,base_fr] = gnOffspring(pop_fr_struct,lu,archive,nfes,max_nfes,f_fr,cr_fr);
+            [ui_fo,base_fo] = gnOffspring(pop_fo_struct,lu,archive,nfes,max_nfes,f_fo,cr_fo);
 
             %% evaluate offspring populations of subpopulations
             ui_fr = evalpop(ui_fr, func);
             ui_fo = evalpop(ui_fo, func);
             
-            [fr_size,~] = size(ui_fr);
-            [fo_size,~] = size(ui_fo);
-            nfes = nfes + pop_fr_struct.popsize + pop_fo_struct.popsize;
-            
+            % TODO nfes 是否有重复计算 算多了
+            nfes = nfes + (pop_fr_struct.popsize + pop_fo_struct.popsize) * 2;
             
             % updated subpopulations stored in structs
-            [pop_fr_struct,archive_fr,archive,suc_f_fr,suc_cr_fr,delta_k_fr] = update_pop_fr(pop_fr_struct,ui_fr,archive,f_fr,cr_fr);
-            [pop_fo_struct,archive_fo,archive,suc_f_fo,suc_cr_fo,delta_k_fo] = update_pop_fo(pop_fo_struct,ui_fo,archive,f_fo,cr_fo,epsilon);
+            [pop_fr_struct,archive_fr,archive,suc_f_fr,suc_cr_fr,delta_k_fr] = update_pop_fr(pop_fr_struct,ui_fr,base_fr,archive,f_fr,cr_fr);
+            [pop_fo_struct,archive_fo,archive,suc_f_fo,suc_cr_fo,delta_k_fo] = update_pop_fo(pop_fo_struct,ui_fo,base_fo,archive,f_fo,cr_fo);
             
             % combining information from subpopulation
             delta_k = [delta_k_fr;delta_k_fo];

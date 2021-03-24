@@ -1,8 +1,9 @@
-function [pop_struct, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_fr(pop_struct,ui,archive,f,cr)
+function [pop_struct, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_fr(pop_struct,ui,base_index,archive,f,cr)
 %COMPARE_FR update population using FROFI
 % input:
     % pop_struct   -- struct of population matrix, problem_size etc.
     % ui           -- offspring population of pop
+    % base_index   -- indices of base vector 
     % archive      -- archive stores defeated parents
     % f            -- scale factor used by ui
     % cr           -- crossover rate used by ui
@@ -29,7 +30,7 @@ function [pop_struct, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_f
 %  NOTE: If the selected one is from pop, it will go to archive (shared by 
 %  subpopulations), otherwise the one from ui will be stored at archive_fr
 
-% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
+% Version 1.4 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/25
     
 %% 
     suc_cr = [];
@@ -40,11 +41,12 @@ function [pop_struct, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_f
     
     delta_k = [];
     popsize = pop_struct.popsize;
+    lambda = popsize * 2;
     pop = pop_struct.pop;
 
     % compare between offspring individual and parent
-    for k = 1 : popsize
-       cur_par = pop(k,:);
+    for k = 1 : lambda
+       cur_par = pop(base_index(k),:);
        cur_off = ui(k,:);
        
        par_fit = cur_par(end - 1);

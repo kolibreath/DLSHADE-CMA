@@ -1,4 +1,4 @@
-function ui = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
+function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
 %GNOFFSPRING generate offspring by DE/current-to-pbetter*/
 % input:
     % pop                   -- population of individuals (pop_fr or pop_ec)
@@ -8,6 +8,7 @@ function ui = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
     % cr                    -- generated crossover rate cr
 % output:
     % ui                    -- individual after mutation and crossover
+    % r0                    -- base vector index
 
 % Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
 
@@ -30,13 +31,14 @@ function ui = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
         pop = sortrows(pop, columns - 1);
     end
     
-    % mutation
-    r0 = [1:popsize];
+    %% mutation
+    % select lambda parent as base vector 
+    lambda = popsize * 2;
+    r0 = [1:lambda];
     popAll = [pop; archive.pop];
-    [r1, r2] = gnR1R2(popsize, size(popAll, 1), r0);
-    
+    [r1, r2] = gnR1R2(lambda, size(popAll, 1), r0);
+
     pop = pop(:,1:problem_size);
-    lambda = popsize * 2;  
     pbetter = zeros(lambda,problem_size);
     for k = 1: lambda
         pbetter(k,:) = (pop_struct.xmean' + pop_struct.sigma ...
@@ -45,7 +47,6 @@ function ui = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
     
     popAll = popAll(:,1:problem_size);
     
-  
     f_w = gnFw(nfes,max_nfes,f);
     vi = pop + f_w(: , ones(1, problem_size)) .* (pbetter(:,1:problem_size) ...
              - pop(:,1:problem_size))...
