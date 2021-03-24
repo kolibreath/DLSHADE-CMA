@@ -21,10 +21,8 @@ global initial_flag ; % for CEC2017 test function evaluation
 
 rand('seed', sum(100 * clock));
 
-global TEST_GEN_OFF;
-
 for func = 1:28
-    TEST_GEN_OFF = 2;
+
     optimum = func * 100.0;
     %% PARAMETER SETTINGS FOR PROBLEM SIZE
     Dimension_size = [10, 30, 50, 100];
@@ -57,7 +55,7 @@ for func = 1:28
         p_best_rate = 0.11;
         arc_rate = 1.4;         % archive for saving defeated parents
         memory_size = 5;        % memory for successful F and CR
-        popsize = 200;          % popsize = mu (size of parent)
+        popsize = 10;          % popsize = mu (size of parent)
         
         %% PARAMETER SETTINGS FOR LINEAR POPULATION SIZE REDUCTION (LSPR)
         max_popsize = popsize;
@@ -84,7 +82,7 @@ for func = 1:28
    
         % the population is divided into two sub-populations, they have
         % the same (almost the same) parameters, while pop_fr using feasibility rule
-        % and pop_fo using only fitness to compare two individuals
+        % and pop_fo using only fitness to compare between two individuals
         popsize_fr = floor(popsize / 2);
         popsize_fo = popsize - popsize_fr;
 
@@ -175,13 +173,16 @@ for func = 1:28
             [memory_sf,memory_scr,memory_pos] = update_memory(suc_f,suc_cr,memory_sf,memory_scr,memory_size,memory_pos,delta_k);
 
             %% resize the population size of pop_fo and pop_fr
+           
+            % Note: population in structs are sorted
+            [pop_fr_struct,pop_fo_struct,delete_individuald] ...
+                = subpop_com(pop_fr_struct,pop_fo_struct, ...
+                  archive_fr,archive_fo);
+              
             % TODO 如果同时对两个子种群施加LSPR这样的变化是否太大了？
             pop_fo_struct = resize_pop(max_popsize,min_popsize,pop_fo_struct,max_nfes,nfes);
             pop_fr_struct = resize_pop(max_popsize,min_popsize,pop_fr_struct,max_nfes,nfes);
 
-            [pop_fr_struct,pop_fo_struct,delete_individuald] ...
-                = subpop_com(pop_fr_struct,pop_fo_struct, ...
-                  archive_fr,archive_fo,epsilon);
               
             archive.pop = [archive.pop; delete_individuald];
             archive.NP = round(arc_rate * (pop_fo_struct.popsize + pop_fr_struct.popsize));
@@ -192,12 +193,10 @@ for func = 1:28
                archive.pop = archive.pop(rndpos, :);
             end
 
-            % CMA parameters update epsilon update
+            % CMA parameters update 
             [pop_fr_struct] = update_cma(pop_fr_struct,nfes);
             [pop_fo_struct] = update_cma(pop_fo_struct,nfes);
-            
-            epsilon = update_epsilon(epsilon_zero, nfes,fes_control,cp);
-            
+
             %% update best so far solution
             % TODO conv 可能小于0 ??
             k = 1;
@@ -227,7 +226,7 @@ for func = 1:28
             end
         end % end of while
         fprintf('run= %d, fitness = %d\n, conv = %d\n' ,run_id,bsf_solution(end-1),bsf_solution(end));
-               
+        disp(bsf_solution);
        end %% end 1 run
     
     end %% end of iterate one problem size

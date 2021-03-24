@@ -34,9 +34,9 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
     %% mutation
     % select lambda parent as base vector 
     lambda = popsize * 2;
-    r0 = [1:lambda];
+    r0 = ceil(rand(1,lambda) * popsize);
     popAll = [pop; archive.pop];
-    [r1, r2] = gnR1R2(lambda, size(popAll, 1), r0);
+    [r1, r2] = gnR1R2(popsize, size(popAll, 1), r0);
 
     pop = pop(:,1:problem_size);
     pbetter = zeros(lambda,problem_size);
@@ -47,11 +47,11 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
     
     popAll = popAll(:,1:problem_size);
     
+    base_vectors = pop(r0,:);
     f_w = gnFw(nfes,max_nfes,f);
-    vi = pop + f_w(: , ones(1, problem_size)) .* (pbetter(:,1:problem_size) ...
-             - pop(:,1:problem_size))...
-             + f(: , ones(1, problem_size)).* (pop(r1, :) - popAll(r2, :));
-    vi = boundConstraint(vi, pop, lu);
+    vi = base_vectors + f_w(: , ones(1, problem_size)) .* (pbetter - base_vectors)...
+       + f(: , ones(1, problem_size)).* (pop(r1, :) - popAll(r2, :));
+    vi = boundConstraint(vi,pop,r0,lu);
 
     % mutation without CMA-ES
 %     pNP = max(round(popsize*0.11), 2); %% choose at least two best solutions
@@ -74,22 +74,13 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
 %     vi = boundConstraint(vi, pop, lu);
     
     % crossover
-    mask = rand(popsize, problem_size) > cr(:, ones(1, problem_size)); % mask is used to indicate which elements of ui comes from the parent
-    rows = (1:popsize)'; cols = floor(rand(popsize, 1) * problem_size) + 1; % choose one position where the element of ui doesn't come from the parent
-    jrand = sub2ind([popsize problem_size], rows, cols); mask(jrand) = false;
+    mask = rand(lambda, problem_size) > cr(:, ones(1, problem_size)); % mask is used to indicate which elements of ui comes from the parent
+    rows = (1:lambda)'; 
+    cols = floor(rand(lambda, 1) * problem_size) + 1; % choose one position where the element of ui doesn't come from the parent
+    jrand = sub2ind([lambda problem_size], rows, cols); mask(jrand) = false;
     ui = vi; 
-    ui(mask) = pop(mask);
-    
-    % TEST 测试是否是种群生成的解不好（测试是因为吸收解产生的bug还是生成解的bug！）
-%     half_index = floor(rand(1,min(5,popsize))* popsize) ;
-%     best_value = [-28.5728767628436	-16.0206929176103	-34.2673501353112	-45.8181121001983	-18.0797811467752	25.7256790480433	24.7165639146866	11.2157194891295	-12.1366171125047	-0.915506660864843];
-%     global TEST_GEN_OFF;
-%     if TEST_GEN_OFF ~=0 
-%         for i = half_index
-%             ui(i,:) = best_value;
-%         end
-%         TEST_GEN_OFF = TEST_GEN_OFF - 1;
-%     end
+    ui(mask) = base_vectors(mask);
+   
 end
 
 function f_w = gnFw(nfes,max_nfes,f)

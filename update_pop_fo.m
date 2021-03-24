@@ -42,20 +42,11 @@ function [pop_struct, archive_fo, archive, suc_f, suc_cr, delta_k] = update_pop_
         % individual which has better fitness survive
         if par_fit > off_fit
             % parent is defeated
-            [pop,archive,suc_f,suc_cr,delta_k] = replace_record(pop, k, cur_off, archive, cur_par, suc_f, suc_cr, f, cr, delta_k);
+            [pop,archive,suc_f,suc_cr,delta_k] = replace_record(pop, base_index(k), cur_off, archive, cur_par, suc_f, suc_cr, f, cr, delta_k);
         else
             % offspring is defeated
-            [archive_fo, archive_frofi] = save_archive(archive_fr, archive_frofi, cur_par, cur_off);
+            archive_fo = [archive_fo; cur_off];
         end
-
     end
-
-    %% applying FROFI replacement strategy
-    [length, ~] = size(archive_frofi);
-
-    if length ~= 0
-        pop = replacement(pop_struct, archive_frofi);
-    end
-
     pop_struct.pop = pop; % rewrite updated population into pop_struct
 end

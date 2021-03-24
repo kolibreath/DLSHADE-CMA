@@ -19,35 +19,22 @@ function pop_struct = resize_pop(max_popsize,min_popsize,pop_struct,max_nfes,nfe
     
 % Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
 
-%% for resizing the population size
-    
-    
+    %% for resizing the population size
     pop = pop_struct.pop;
     plan_popsize = round((((min_popsize - max_popsize) / max_nfes) * nfes) + max_popsize);
     popsize = pop_struct.popsize;
     if popsize > plan_popsize
        % prevent popsize after resize is smaller than min_popsize
        reduction_ind_num = min(popsize - plan_popsize, popsize - min_popsize);
-       popsize = popsize - reduction_ind_num;
-       pop_struct.popsize = popsize;
+       
+       k = 0; 
+       while k < reduction_ind_num
+           worst_ind = popsize - k;
+           pop(worst_ind) = [];
+           k = k+1;
+       end 
 
-       % find PFS
-       % TODO 使用pfs这样的方式是否可行?
-       feasible_nums = length(find(pop(end) == 0));
-       pfs = feasible_nums / popsize;
-       
-       if rand > pfs % early stage of evolution
-           conv = pop(:, end);
-           [~, indBest] = sort(conv, 'ascend');
-       else          % later stage of evolution
-           fitness = pop(:, end);
-           [~, indBest] = sort(fitness, 'ascend');
-       end
-       
-       for r = 1:reduction_ind_num
-            worst_ind = indBest(end);
-            pop(worst_ind, :) = [];
-       end
+       pop_struct.popsize = popsize - reduction_ind_num;
 
     end
     pop_struct.pop = pop;

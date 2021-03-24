@@ -36,17 +36,16 @@ function [pop_struct, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_f
     suc_cr = [];
     suc_f = [];
     archive_fr = [];
-    
     archive_frofi = [];
     
     delta_k = [];
     popsize = pop_struct.popsize;
     lambda = popsize * 2;
     pop = pop_struct.pop;
-
+    
     % compare between offspring individual and parent
     for k = 1 : lambda
-       cur_par = pop(base_index(k),:);
+       cur_par = pop(base_index,:);
        cur_off = ui(k,:);
        
        par_fit = cur_par(end - 1);
@@ -54,12 +53,11 @@ function [pop_struct, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_f
        
        par_conv = cur_par(end);
        off_conv = cur_off(end);
-       
        %% between two infeasible solutions, the one with smaller conV wins
        if par_conv ~=0 && off_conv ~= 0
           if par_conv > off_conv
              %parent is defeated
-             [pop,archive,suc_f,suc_cr, delta_k] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr,delta_k);
+             [pop,archive,suc_f,suc_cr, delta_k] = replace_record(pop,base_index(k),cur_off,archive,cur_par,suc_f,suc_cr,f,cr,delta_k);
           else
               % ui is defeated 
              [archive_fr, archive_frofi] = save_archive(archive_fr, archive_frofi, cur_par, cur_off);
@@ -68,16 +66,16 @@ function [pop_struct, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_f
        elseif par_conv == 0 && off_conv == 0
            if par_fit > off_fit 
               %parent is defeated
-              [pop,archive,suc_f,suc_cr, delta_k] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr,delta_k);
+              [pop,archive,suc_f,suc_cr, delta_k] = replace_record(pop,base_index(k),cur_off,archive,cur_par,suc_f,suc_cr,f,cr,delta_k);
            else
                % ui is defeated 
-              [archive_fr, archive_frofi] = save_archive(archive_fr, archive_frofi, cur_par, cur_off);
+               [archive_fr, archive_frofi] = save_archive(archive_fr, archive_frofi, cur_par, cur_off);
            end
        %% feasible one is better than its infeasible counterpart
        else 
            if off_conv == 0 
              %parent is defeated
-             [pop,archive,suc_f,suc_cr, delta_k] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr,delta_k);
+             [pop,archive,suc_f,suc_cr, delta_k] = replace_record(pop,base_index(k),cur_off,archive,cur_par,suc_f,suc_cr,f,cr,delta_k);
            else 
                 % ui is defeated 
               [archive_fr, archive_frofi] = save_archive(archive_fr, archive_frofi, cur_par, cur_off);

@@ -1,4 +1,4 @@
-function [pop, archive, suc_f, suc_cr, delta_k] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr,delta_k)
+function [pop, archive, suc_f, suc_cr, delta_k] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr,delta_k)                                                               
 % REPLACE_RECORD replace defeated parent into archive and record successful
 % input: 
     % pop       -- population
@@ -24,7 +24,9 @@ function [pop, archive, suc_f, suc_cr, delta_k] = replace_record(pop,k,cur_off,a
 % scale factor F and crossover rate cr
   pop(k, :) = cur_off;
   archive.pop = [archive.pop; cur_par];
+  
   % record successful f and cr
+  % TODO 使用最好的子代替换
   suc_f = [suc_f; f(k)];
   suc_cr = [suc_cr;cr(k)];
   

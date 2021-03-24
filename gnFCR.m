@@ -5,13 +5,14 @@ function [f, cr] = gnFCR(popsize,memory_size,memory_sf,memory_scr)
         % mu_f         -- mean value of distribution generating f
         % mu_cr        -- mean value of distribution generating cr
     %  output:
-        % F            -- the vector of scale factor   (vector of popsize * 1)
-        % CR           -- the vector of crossover rate (vector of popsize * 1)
+        % F            -- the vector of scale factor   (vector of lambda * 1)
+        % CR           -- the vector of crossover rate (vector of lambda * 1)
 
-% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18 
+% Version 1.4 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18 
 
 %%
-     mem_rand_index = ceil(memory_size * rand(popsize, 1));
+     lambda = popsize * 2; 
+     mem_rand_index = ceil(memory_size * rand(lambda, 1));
      % generate mu_f and mu_cr for Cauchy and Gaussian distribution
      mu_f = memory_sf(mem_rand_index);
      mu_cr = memory_scr(mem_rand_index);
@@ -24,8 +25,7 @@ function [f, cr] = gnFCR(popsize,memory_size,memory_sf,memory_scr)
      cr = max(cr, 0);
       
      %% for generating scaling factor
-     % TODO  should be randc in original paper
-     f = mu_f + 0.1 * tan(pi * (rand(popsize, 1) - 0.5));
+     f = mu_f + 0.1 * tan(pi * (rand(lambda, 1) - 0.5));
      pos = find(f <= 0);
 
      while ~isempty(pos)
