@@ -96,7 +96,7 @@ for func = 1:28
         
         %% initialize both subpopulations        
         k = 1;
-        while k <= popsize_fr &&  k <= ec
+        while k <= popsize_fr &&  k <= popsize_fo
             pop_fr(k,:) =  (cma.xmean' + cma.sigma * B * (D .* randn(problem_size, 1)))';
             pop_fo(k,:) =  (cma.xmean' + cma.sigma * B * (D .* randn(problem_size, 1)))';
             k = k + 1;
@@ -148,27 +148,29 @@ for func = 1:28
             
             %% generate f and cr for subpopulations respectively
             [f_fr, cr_fr] = gnFCR(pop_fr_struct.popsize,memory_size,memory_sf,memory_scr);
-            [f_ec, cr_ec] = gnFCR(pop_fo_struct.popsize,memory_size,memory_sf,memory_scr);
+            [f_fo, cr_fo] = gnFCR(pop_fo_struct.popsize,memory_size,memory_sf,memory_scr);
             
-            % Note: ui_fr and ui_ec are un-evaluated matrix (lambda * problem_size)
+            % Note: ui_fr and ui_fo are un-evaluated matrix (lambda * problem_size)
             ui_fr = gnOffspring(pop_fr_struct,lu,archive,nfes,max_nfes,f_fr,cr_fr);
-            ui_ec = gnOffspring(pop_fo_struct,lu,archive,nfes,max_nfes,f_ec,cr_ec);
+            ui_fo = gnOffspring(pop_fo_struct,lu,archive,nfes,max_nfes,f_fo,cr_fo);
 
             %% evaluate offspring populations of subpopulations
             ui_fr = evalpop(ui_fr, func);
-            ui_ec = evalpop(ui_ec, func);
+            ui_fo = evalpop(ui_fo, func);
             
+            [fr_size,~] = size(ui_fr);
+            [fo_size,~] = size(ui_fo);
             nfes = nfes + pop_fr_struct.popsize + pop_fo_struct.popsize;
             
             
             % updated subpopulations stored in structs
             [pop_fr_struct,archive_fr,archive,suc_f_fr,suc_cr_fr,delta_k_fr] = update_pop_fr(pop_fr_struct,ui_fr,archive,f_fr,cr_fr);
-            [pop_fo_struct,archive_ec,archive,suc_f_ec,suc_cr_ec,delta_k_ec] = update_pop_fo(pop_fo_struct,ui_ec,archive,f_ec,cr_ec,epsilon);
+            [pop_fo_struct,archive_fo,archive,suc_f_fo,suc_cr_fo,delta_k_fo] = update_pop_fo(pop_fo_struct,ui_fo,archive,f_fo,cr_fo,epsilon);
             
             % combining information from subpopulation
-            delta_k = [delta_k_fr;delta_k_ec];
-            suc_f = [suc_f_fr;suc_f_ec];
-            suc_cr = [suc_cr_fr;suc_cr_ec];
+            delta_k = [delta_k_fr;delta_k_fo];
+            suc_f = [suc_f_fr;suc_f_fo];
+            suc_cr = [suc_cr_fr;suc_cr_fo];
             
             %TODO remove useless variables
             %% update f and cr memory
@@ -181,7 +183,7 @@ for func = 1:28
 
             [pop_fr_struct,pop_fo_struct,delete_individuald] ...
                 = subpop_com(pop_fr_struct,pop_fo_struct, ...
-                  archive_fr,archive_ec,epsilon);
+                  archive_fr,archive_fo,epsilon);
               
             archive.pop = [archive.pop; delete_individuald];
             archive.NP = round(arc_rate * (pop_fo_struct.popsize + pop_fr_struct.popsize));
@@ -203,7 +205,7 @@ for func = 1:28
             k = 1;
             while k < pop_fr_struct.popsize && k < pop_fo_struct.popsize
                 off_fr = pop_fr_struct.pop(k,:);
-                off_ec = pop_fo_struct.pop(k,:);
+                off_fo = pop_fo_struct.pop(k,:);
                 % better in conv
                 if off_fr(end) < bsf_solution(end)
                     bsf_solution = off_fr;
@@ -213,11 +215,11 @@ for func = 1:28
                 end
                 
                 % better in conv
-                if off_ec(end) < bsf_solution(end)
-                    bsf_solution = off_ec;
+                if off_fo(end) < bsf_solution(end)
+                    bsf_solution = off_fo;
                 % equal conv better in fitness
-                elseif off_ec(end) == bsf_solution(end) && off_ec(end-1) < bsf_solution(end-1)
-                    bsf_solution = off_ec;
+                elseif off_fo(end) == bsf_solution(end) && off_fo(end-1) < bsf_solution(end-1)
+                    bsf_solution = off_fo;
                 end
                 k =k +1;
             end
