@@ -55,7 +55,7 @@ for func = 1:28
         p_best_rate = 0.11;
         arc_rate = 1.4;         % archive for saving defeated parents
         memory_size = 5;        % memory for successful F and CR
-        popsize = 10;          % popsize = mu (size of parent)
+        popsize = 30;          % popsize = mu (size of parent)
         
         %% PARAMETER SETTINGS FOR LINEAR POPULATION SIZE REDUCTION (LSPR)
         max_popsize = popsize;
@@ -202,7 +202,11 @@ for func = 1:28
                 disp(e);
             end
             [pop_fo_struct] = update_cma(pop_fo_struct,nfes);
-
+            
+            if max(pop_fr_struct.D) > 1e7 * min(pop_fr_struct.D) || max(pop_fo_struct.D) > 1e7 * min(pop_fo_struct.D)
+               break;
+            end
+            
             %% update best so far solution
             % TODO conv 可能小于0 ??
             k = 1;
