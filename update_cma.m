@@ -1,16 +1,23 @@
-function pop_struct = update_cma(pop_struct,cma,nfes)
+function [pop_struct,cma]= update_cma(pop_struct,nfes)
 % UPDATE_CMA update CMA related parameters
 % input:
     % pop_struct    -- population struct and population is sorted by
     % sort_ec or sort_fr
-    % cma           -- cma struct
 % output: 
     % pop_struct    -- population struct with its updated memebers
-% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/20
+    % cma           -- updated CMA struct 
+% Version 1.3 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/24
 %UPDATE_CMA update parameters in CMA
 
     pop = pop_struct.pop;
+    problem_size = pop_struct.problem_size;
     xold = pop_struct.xmean;
+    popsize = pop_struct.popsize; % mu
+    % in the LSHADE framework, the LPSR strategy is implemented, so the
+    % popsize(mu) and parameters in CMA related to it will be updated as well
+    % the fastest way is to reinitialized the cma struct with 'new' mu
+    cma = assem_cma(problem_size,popsize);
+    
     pop_struct.xmean =  (cma.weights)* pop(1:cma.mu, 1:pop_struct.problem_size); 
     
     % update evolution paths

@@ -60,14 +60,14 @@ for func = 1:28
         p_best_rate = 0.11;
         arc_rate = 1.4;         % archive for saving defeated parents
         memory_size = 5;        % memory for successful F and CR
-        popsize = 200; % TODO free from problem_size
+        popsize = 200;          % popsize = mu (size of parent)
         
         %% PARAMETER SETTINGS FOR LINEAR POPULATION SIZE REDUCTION (LSPR)
         max_popsize = popsize;
         min_popsize = 4.0;
         
         %% PARAMETER SETTINGS FOR COVARIANCE ADAPTATION MATIRX (CMA)
-        cma = assem_cma_struct(problem_size,p_best_rate,popsize);
+        cma = assem_cma(problem_size,popsize);
         
         %% PARAMETER SETTTINGS FOR COVARIANCE MATRIX ADAPTATION 
         % Note: subpopulations evolve these parameters seperately
@@ -117,12 +117,9 @@ for func = 1:28
         
         clear k; 
         
-        % TODO update epsilon update Covariance matrix and sigma
         % assign members for subpopulation
-        xmean = cma.xmean;
-        pop_fr_struct = assem_pop(pop_fr,popsize_fr,problem_size,xmean,C,D,B,invsqrtC,eigeneval,cma,1);
-        pop_ec_struct = assem_pop(pop_ec,popsize_ec,problem_size,xmean,C,D,B,invsqrtC,eigeneval,cma,2);
-        clear xmean;
+        pop_fr_struct = assem_pop(pop_fr,popsize_fr,problem_size,C,D,B,invsqrtC,eigeneval,cma);
+        pop_ec_struct = assem_pop(pop_ec,popsize_ec,problem_size,C,D,B,invsqrtC,eigeneval,cma);
         
         %% evaluate both pop_fr and pop_ec
         % TODO test! 生成的个体都是可行解！？
@@ -154,18 +151,20 @@ for func = 1:28
         clear pop_ec;
         clear pop_fr;
         
-        %% main loop
+        clear cma;
+
+        %% -------------------------------- main loop -------------------------------
         while nfes < max_nfes
       
-            % generate f and cr for subpopulations respectively
+            %% generate f and cr for subpopulations respectively
             [f_fr, cr_fr] = gnFCR(pop_fr_struct.popsize,memory_size,memory_sf,memory_scr);
             [f_ec, cr_ec] = gnFCR(pop_ec_struct.popsize,memory_size,memory_sf,memory_scr);
             
-            % Note: ui_fr and ui_ec are un-evaluated matrix (popsize * problem_size)
+            % Note: ui_fr and ui_ec are un-evaluated matrix (lambda * problem_size)
             ui_fr = gnOffspring(pop_fr_struct,lu,archive,nfes,max_nfes,f_fr,cr_fr);
             ui_ec = gnOffspring(pop_ec_struct,lu,archive,nfes,max_nfes,f_ec,cr_ec);
 
-            % evaluate offspring populations of subpopulations
+            %% evaluate offspring populations of subpopulations
             ui_fr = evalpop(ui_fr, func);
             ui_ec = evalpop(ui_ec, func);
             
@@ -189,12 +188,6 @@ for func = 1:28
             % TODO 如果同时对两个子种群施加LSPR这样的变化是否太大了？
             pop_ec_struct = resize_pop(max_popsize,min_popsize,pop_ec_struct,max_nfes,nfes);
             pop_fr_struct = resize_pop(max_popsize,min_popsize,pop_fr_struct,max_nfes,nfes);
-            
-            % popsize decrease, and mu in cma struct should decrease, and update cma.weights
-            cma.mu = min(pop_ec_struct.popsize,pop_fr_struct.popsize) * p_best_rate;
-            cma.weights = log(cma.mu + 1/2) - log(1:cma.mu);
-            cma.weights = cma.weights / sum(cma.weights);
-            cma.mu = floor(cma.mu);
 
             [pop_fr_struct,pop_ec_struct,delete_individuald] ...
                 = subpop_com(pop_fr_struct,pop_ec_struct, ...
@@ -208,11 +201,10 @@ for func = 1:28
                rndpos = rndpos(1:archive.NP);
                archive.pop = archive.pop(rndpos, :);
             end
-            
+
             % CMA parameters update epsilon update
-            % TEST
-%             pop_fr_struct = update_cma(pop_fr_struct, cma,nfes);
-%             pop_ec_struct = update_cma(pop_ec_struct, cma,nfes);
+            [pop_fr_struct] = update_cma(pop_fr_struct,nfes);
+            [pop_ec_struct] = update_cma(pop_ec_struct,nfes);
             
             epsilon = update_epsilon(epsilon_zero, nfes,fes_control,cp);
             

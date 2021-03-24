@@ -1,9 +1,8 @@
-function cma = assem_cma_struct(problem_size,p_best_rate,popsize)
+function cma = assem_cma(problem_size,popsize)
 %ASSEM_CMA_STRUCT construct a struct stores CMA related constants
 % input:
     % lu            -- lower and upper bounds of problem
     % problem_size  -- problem size
-    % p_best_rate   -- top p% individual in population
     % popsize       -- size of population
 % output:
     % cma           -- construct CMA related information into cma (struct)
@@ -18,7 +17,7 @@ function cma = assem_cma_struct(problem_size,p_best_rate,popsize)
     % two meanings: 
     %   1) top p% of population based on feasibility or constraint violation  in LSHADE framework
     %   2) used in CMA to update xmean and some other parameters
-    mu = p_best_rate * popsize; 
+    mu = popsize; % (number of parent) 
     weights = log(mu + 1/2) - log(1:mu); % 1 * mu  vector for weighted recombination
     weights = weights / sum(weights); 
     mu = floor(mu);
@@ -35,9 +34,11 @@ function cma = assem_cma_struct(problem_size,p_best_rate,popsize)
     cma.cmu = min(1 - c1, 2 * (mueff - 2 + 1 / mueff) / ((problem_size + 2)^2 + mueff)); % and for rank-mu update
     cma.damps = 1 + 2 * max(0, sqrt((mueff - 1) / (problem_size + 1)) - 1) + cs; % damping for sigma  usually close to 1
         
-    % Initialize dynamic (internal) strategy parameters and constants
-    cma.pc = zeros(1, problem_size);  
-    cma.ps = zeros(1, problem_size); % evolution paths for C and sigma
+    % in the proposed algorithm, CMA-ES give the control of pc and ps
+    % including its update to the evolution of subpopulations
+%     % Initialize dynamic (internal) strategy parameters and constants
+%     cma.pc = zeros(1, problem_size);  
+%     cma.ps = zeros(1, problem_size); % evolution paths for C and sigma
     
     % expectation of ||N(0,I)|| == norm(randn(N,1))
     cma.chiN = problem_size^0.5 * (1 - 1 / (4 * problem_size) + 1 / (21 * problem_size^2)); 

@@ -1,4 +1,4 @@
-function pop_struct = assem_pop(pop,popsize, problem_size,xmean,C,D,B,invsqrtC,eigeneval,cma,tag)
+function pop_struct = assem_pop(pop,popsize, problem_size,C,D,B,invsqrtC,eigeneval,cma,tag)
 %ASSEM_POP assign members for subpopulation
 % input:    
     % pop           -- population (pop_fr or pop_ec)
@@ -17,8 +17,8 @@ function pop_struct = assem_pop(pop,popsize, problem_size,xmean,C,D,B,invsqrtC,e
 
 %% 
     pop_struct.pop = pop;
-    pop_struct.popsize = popsize;
-    pop_struct.xmean = xmean;
+    pop_struct.popsize = popsize;  % refers to mu in ES
+    pop_struct.xmean = cma.xmean;
     pop_struct.sigma = cma.sigma;
     pop_struct.C = C;
     pop_struct.D = D;
@@ -26,10 +26,9 @@ function pop_struct = assem_pop(pop,popsize, problem_size,xmean,C,D,B,invsqrtC,e
     pop_struct.invsqrtC = invsqrtC;
     pop_struct.eigeneval = eigeneval;
     pop_struct.problem_size = problem_size;
-    pop_struct.tag = tag;
     % each subpopulation has its own evolution path
-    pop_struct.pc = cma.pc;
-    pop_struct.ps = cma.ps;
+    pop_struct.pc = zeros(1,problem_size);
+    pop_struct.ps = zeros(1, problem_size);
     
 end
 
