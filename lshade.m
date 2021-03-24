@@ -53,9 +53,6 @@ for func = 1:28
         nfes = 0;
         
         %% PARAMETER SETTINGS FOR FROFI
-        %% PARAMETER SETTINGS FOR EPSILON CONSTRAINTS
-        cp = 5; 
-        fes_control = 0.2 * max_nfes;
         %% PARAMETER SETTINGS FOR LSHADE
         p_best_rate = 0.11;
         arc_rate = 1.4;         % archive for saving defeated parents
@@ -86,22 +83,22 @@ for func = 1:28
         % the additional 4 'elements' are [g, h, f, conV] 
    
         % the population is divided into two sub-populations, they have
-        % the same (almost the same) parameters but different contraint
-        % handling techniques (and parameters related to the techniques)
+        % the same (almost the same) parameters, while pop_fr using feasibility rule
+        % and pop_fo using only fitness to compare two individuals
         popsize_fr = floor(popsize / 2);
-        popsize_ec = popsize - popsize_fr;
+        popsize_fo = popsize - popsize_fr;
+
         max_popsize = floor(max_popsize / 2);
         min_popsize = floor(min_popsize / 2);
         
         pop_fr = zeros(popsize_fr, problem_size);
-        pop_ec = zeros(popsize_ec, problem_size);
+        pop_fo = zeros(popsize_fo, problem_size);
         
-        %% initialize both subpopulations
-        
+        %% initialize both subpopulations        
         k = 1;
-        while k <= popsize_fr &&  k <= popsize_ec
+        while k <= popsize_fr &&  k <= ec
             pop_fr(k,:) =  (cma.xmean' + cma.sigma * B * (D .* randn(problem_size, 1)))';
-            pop_ec(k,:) =  (cma.xmean' + cma.sigma * B * (D .* randn(problem_size, 1)))';
+            pop_fo(k,:) =  (cma.xmean' + cma.sigma * B * (D .* randn(problem_size, 1)))';
             k = k + 1;
         end
         
@@ -110,8 +107,8 @@ for func = 1:28
             k = k + 1;
         end
         
-        while k <= popsize_ec
-            pop_ec(k, :) = (cma.xmean' + cma.sigma * B * (D .* randn(problem_size, 1)))';
+        while k <= popsize_fo
+            pop_fo(k, :) = (cma.xmean' + cma.sigma * B * (D .* randn(problem_size, 1)))';
             k = k + 1;
         end
         
@@ -119,25 +116,18 @@ for func = 1:28
         
         % assign members for subpopulation
         pop_fr_struct = assem_pop(pop_fr,popsize_fr,problem_size,C,D,B,invsqrtC,eigeneval,cma);
-        pop_ec_struct = assem_pop(pop_ec,popsize_ec,problem_size,C,D,B,invsqrtC,eigeneval,cma);
+        pop_fo_struct = assem_pop(pop_fo,popsize_fo,problem_size,C,D,B,invsqrtC,eigeneval,cma);
         
-        %% evaluate both pop_fr and pop_ec
+        %% evaluate both pop_fr and pop_fo
         % TODO test! 生成的个体都是可行解！？
         pop_fr = evalpop(pop_fr, func);
-        pop_ec = evalpop(pop_ec, func);
+        pop_fo = evalpop(pop_fo, func);
         
         pop_fr_struct.pop = pop_fr;
-        pop_ec_struct.pop = pop_ec;
+        pop_fo_struct.pop = pop_fo;
         
         nfes = nfes + popsize;
-        
-        %% INITIALIZATION FOR EPSILON-CONSTRAINT
-        % TODO 测试种群合适的大小 为什么协方差矩阵会劣化
-        theta = floor(0.5 * pop_ec_struct.popsize);   % conv of the theta-th individual selected as epsilon_zero
-        sorted_conv = sort(pop_ec(:, end), 'ascend');
-        epsilon_zero = sorted_conv(theta);
-        epsilon = max(max(pop_fr(:, end)), max(pop_ec(:, end)));
-
+        % TODO 测试种群合适的大小 解决协方差矩阵的问题
         %% INITIALIZATION FOR LSHADE ARCHIVE
         memory_sf = 0.5 .* ones(memory_size, 1);
         memory_scr = 0.5 .* ones(memory_size, 1);
@@ -147,33 +137,33 @@ for func = 1:28
         archive.pop = zeros(0, problem_size); % the solutions stored in te archive
         archive.funvalues = zeros(0, 1); % the function value of the archived solutions
 
-        % there is no need for pop_fr and pop_ec outside of their structs, delete them LOL
-        clear pop_ec;
+        % there is no need for pop_fr and pop_fo outside of their structs, delete them LOL
+        clear pop_fo;
         clear pop_fr;
         
         clear cma;
 
         %% -------------------------------- main loop -------------------------------
         while nfes < max_nfes
-      
+            
             %% generate f and cr for subpopulations respectively
             [f_fr, cr_fr] = gnFCR(pop_fr_struct.popsize,memory_size,memory_sf,memory_scr);
-            [f_ec, cr_ec] = gnFCR(pop_ec_struct.popsize,memory_size,memory_sf,memory_scr);
+            [f_ec, cr_ec] = gnFCR(pop_fo_struct.popsize,memory_size,memory_sf,memory_scr);
             
             % Note: ui_fr and ui_ec are un-evaluated matrix (lambda * problem_size)
             ui_fr = gnOffspring(pop_fr_struct,lu,archive,nfes,max_nfes,f_fr,cr_fr);
-            ui_ec = gnOffspring(pop_ec_struct,lu,archive,nfes,max_nfes,f_ec,cr_ec);
+            ui_ec = gnOffspring(pop_fo_struct,lu,archive,nfes,max_nfes,f_ec,cr_ec);
 
             %% evaluate offspring populations of subpopulations
             ui_fr = evalpop(ui_fr, func);
             ui_ec = evalpop(ui_ec, func);
             
-            nfes = nfes + pop_fr_struct.popsize + pop_ec_struct.popsize;
+            nfes = nfes + pop_fr_struct.popsize + pop_fo_struct.popsize;
             
             
             % updated subpopulations stored in structs
             [pop_fr_struct,archive_fr,archive,suc_f_fr,suc_cr_fr,delta_k_fr] = update_pop_fr(pop_fr_struct,ui_fr,archive,f_fr,cr_fr);
-            [pop_ec_struct,archive_ec,archive,suc_f_ec,suc_cr_ec,delta_k_ec] = update_pop_ec(pop_ec_struct,ui_ec,archive,f_ec,cr_ec,epsilon);
+            [pop_fo_struct,archive_ec,archive,suc_f_ec,suc_cr_ec,delta_k_ec] = update_pop_fo(pop_fo_struct,ui_ec,archive,f_ec,cr_ec,epsilon);
             
             % combining information from subpopulation
             delta_k = [delta_k_fr;delta_k_ec];
@@ -184,17 +174,17 @@ for func = 1:28
             %% update f and cr memory
             [memory_sf,memory_scr,memory_pos] = update_memory(suc_f,suc_cr,memory_sf,memory_scr,memory_size,memory_pos,delta_k);
 
-            %% resize the population size of pop_ec and pop_fr
+            %% resize the population size of pop_fo and pop_fr
             % TODO 如果同时对两个子种群施加LSPR这样的变化是否太大了？
-            pop_ec_struct = resize_pop(max_popsize,min_popsize,pop_ec_struct,max_nfes,nfes);
+            pop_fo_struct = resize_pop(max_popsize,min_popsize,pop_fo_struct,max_nfes,nfes);
             pop_fr_struct = resize_pop(max_popsize,min_popsize,pop_fr_struct,max_nfes,nfes);
 
-            [pop_fr_struct,pop_ec_struct,delete_individuald] ...
-                = subpop_com(pop_fr_struct,pop_ec_struct, ...
+            [pop_fr_struct,pop_fo_struct,delete_individuald] ...
+                = subpop_com(pop_fr_struct,pop_fo_struct, ...
                   archive_fr,archive_ec,epsilon);
               
             archive.pop = [archive.pop; delete_individuald];
-            archive.NP = round(arc_rate * (pop_ec_struct.popsize + pop_fr_struct.popsize));
+            archive.NP = round(arc_rate * (pop_fo_struct.popsize + pop_fr_struct.popsize));
 
             if size(archive.pop, 1) > archive.NP
                rndpos = randperm(size(archive.pop, 1));
@@ -204,16 +194,16 @@ for func = 1:28
 
             % CMA parameters update epsilon update
             [pop_fr_struct] = update_cma(pop_fr_struct,nfes);
-            [pop_ec_struct] = update_cma(pop_ec_struct,nfes);
+            [pop_fo_struct] = update_cma(pop_fo_struct,nfes);
             
             epsilon = update_epsilon(epsilon_zero, nfes,fes_control,cp);
             
             %% update best so far solution
             % TODO conv 可能小于0 ??
             k = 1;
-            while k < pop_fr_struct.popsize && k < pop_ec_struct.popsize
+            while k < pop_fr_struct.popsize && k < pop_fo_struct.popsize
                 off_fr = pop_fr_struct.pop(k,:);
-                off_ec = pop_ec_struct.pop(k,:);
+                off_ec = pop_fo_struct.pop(k,:);
                 % better in conv
                 if off_fr(end) < bsf_solution(end)
                     bsf_solution = off_fr;
