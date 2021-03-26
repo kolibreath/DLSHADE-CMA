@@ -11,18 +11,15 @@ function [pop_struct,cma]= update_cma(pop_struct,nfes)
 
     pop = pop_struct.pop;
     problem_size = pop_struct.problem_size;
+    pop = pop(:, 1:problem_size);
     xold = pop_struct.xmean;
     popsize = pop_struct.popsize; % mu
     % in the LSHADE framework, the LPSR strategy is implemented, so the
     % popsize(mu) and parameters in CMA related to it will be updated as well
     % the fastest way is to reinitialized the cma struct with 'new' mu
     cma = assem_cma(problem_size,popsize);
-    
-    try
-        pop_struct.xmean =  (cma.weights)* pop(1:cma.mu, 1:pop_struct.problem_size); 
-    catch e
-        disp('fuck');
-    end 
+
+    pop_struct.xmean =  (cma.weights)* pop; 
     % update evolution paths
     mu = popsize;
     lambda = mu * 2;
@@ -37,9 +34,8 @@ function [pop_struct,cma]= update_cma(pop_struct,nfes)
    
     % Adapt covariance matrix C
     % mu difference vectors (fitness and conv information should be excluded)
-    artmp = (1 / pop_struct.sigma) * (pop(1:mu, 1:pop_struct.problem_size)) - repmat(xold, mu, 1);
+    artmp = (1 / pop_struct.sigma) * (pop - repmat(xold, mu, 1));
     artmp = artmp';
-    %TODO 这里检查一下由原来的公式的列向量变成了行向量
     pop_struct.C = (1 - cma.c1 - cma.cmu) * pop_struct.C ... % regard old matrix
            + cma.c1 * (pop_struct.pc' * pop_struct.pc ... % plus rank one update
            + (1 - hsig) * cma.cc * (2 - cma.cc) * pop_struct.C) ... % minor correction if hsig==0

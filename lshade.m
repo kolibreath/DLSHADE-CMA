@@ -197,11 +197,7 @@ for func = 1:28
             end
 
             % CMA parameters update 
-            try
-                [pop_fr_struct] = update_cma(pop_fr_struct,nfes);
-            catch e
-                disp(e);
-            end
+            [pop_fr_struct] = update_cma(pop_fr_struct,nfes);
             [pop_fo_struct] = update_cma(pop_fo_struct,nfes);
             
             if max(pop_fr_struct.D) > 1e7 * min(pop_fr_struct.D) || max(pop_fo_struct.D) > 1e7 * min(pop_fo_struct.D)
