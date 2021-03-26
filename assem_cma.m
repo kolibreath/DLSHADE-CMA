@@ -10,8 +10,6 @@ function cma = assem_cma(problem_size,popsize)
     %% 
     % Note: compare to xmean in pop struct, what 'xmean','sigma' variable here is closer to a 'global variable'
     % 'xmean' etc. in pop struct will adapt themselves, and 'xmean' etc. remain unchanged
-    cma.xmean = rand(1, problem_size);  
-    cma.sigma = 0.3;                       % step size of Gaussian distribution
     %TODO CMA-ES原算法中有stop condition 之后测试一下需不需要加上！
     cma.stopfitness = 1e-10;
     % two meanings: 

@@ -74,7 +74,8 @@ for func = 1:28
         C = B * diag(D.^2) * B';
         invsqrtC = B * diag(D.^ - 1) * B'; % C^-1/2
         eigeneval = 0; % track update of B and D
-        
+        xmean = rand(1,problem_size);
+        sigma = 0.3;
 
         %% INTIIALIZE THE POPULATION
         % individual in population will be viewed as (problem_size + 4) * 1 vector
@@ -95,26 +96,26 @@ for func = 1:28
         %% initialize both subpopulations        
         k = 1;
         while k <= popsize_fr &&  k <= popsize_fo
-            pop_fr(k,:) =  (cma.xmean' + cma.sigma * B * (D .* randn(problem_size, 1)))';
-            pop_fo(k,:) =  (cma.xmean' + cma.sigma * B * (D .* randn(problem_size, 1)))';
+            pop_fr(k,:) =  (xmean' + sigma * B * (D .* randn(problem_size, 1)))';
+            pop_fo(k,:) =  (xmean' + sigma * B * (D .* randn(problem_size, 1)))';
             k = k + 1;
         end
         
         while k <= popsize_fr 
-            pop_fr(k, :) = (cma.xmean' + cma.sigma * B * (D .* randn(problem_size, 1)))';
+            pop_fr(k, :) = (xmean' + sigma * B * (D .* randn(problem_size, 1)))';
             k = k + 1;
         end
         
         while k <= popsize_fo
-            pop_fo(k, :) = (cma.xmean' + cma.sigma * B * (D .* randn(problem_size, 1)))';
+            pop_fo(k, :) = (xmean' + sigma * B * (D .* randn(problem_size, 1)))';
             k = k + 1;
         end
         
         clear k; 
         
         % assign members for subpopulation
-        pop_fr_struct = assem_pop(pop_fr,popsize_fr,problem_size,C,D,B,invsqrtC,eigeneval,cma);
-        pop_fo_struct = assem_pop(pop_fo,popsize_fo,problem_size,C,D,B,invsqrtC,eigeneval,cma);
+        pop_fr_struct = assem_pop(pop_fr,popsize_fr,problem_size,C,D,B,invsqrtC,eigeneval,xmean,sigma);
+        pop_fo_struct = assem_pop(pop_fo,popsize_fo,problem_size,C,D,B,invsqrtC,eigeneval,xmean,sigma);
         
         %% evaluate both pop_fr and pop_fo
         % TODO test! 生成的个体都是可行解！？

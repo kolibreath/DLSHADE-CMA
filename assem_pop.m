@@ -1,4 +1,4 @@
-function pop_struct = assem_pop(pop,popsize, problem_size,C,D,B,invsqrtC,eigeneval,cma,tag)
+function pop_struct = assem_pop(pop,popsize, problem_size,C,D,B,invsqrtC,eigeneval,xmean,sigma)
 %ASSEM_POP assign members for subpopulation
 % input:    
     % pop           -- population (pop_fr or pop_ec)
@@ -18,8 +18,8 @@ function pop_struct = assem_pop(pop,popsize, problem_size,C,D,B,invsqrtC,eigenev
 %% 
     pop_struct.pop = pop;
     pop_struct.popsize = popsize;  % refers to mu in ES
-    pop_struct.xmean = cma.xmean;
-    pop_struct.sigma = cma.sigma;
+    pop_struct.xmean = xmean;
+    pop_struct.sigma = sigma;
     pop_struct.C = C;
     pop_struct.D = D;
     pop_struct.B = B;

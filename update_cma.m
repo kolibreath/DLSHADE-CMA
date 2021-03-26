@@ -24,18 +24,20 @@ function [pop_struct,cma]= update_cma(pop_struct,nfes)
         disp('fuck');
     end 
     % update evolution paths
+    mu = popsize;
+    lambda = mu * 2;
     pop_struct.ps = (1 - cma.cs) * pop_struct.ps ...
              + sqrt(cma.cs * (2 - cma.cs) * cma.mueff) * (pop_struct.xmean - xold) ... 
              * pop_struct.invsqrtC  / pop_struct.sigma;
 
-    hsig = sum(pop_struct.ps.^2) / (1 - (1 - cma.cs)^(2*nfes/pop_struct.popsize)) / pop_struct.problem_size ... 
+    hsig = sum(pop_struct.ps.^2) / (1 - (1 - cma.cs)^(2*nfes/lambda)) / pop_struct.problem_size ... 
             < 2 + 4 / (pop_struct.problem_size + 1);
     pop_struct.pc = (1 - cma.cc) * pop_struct.pc ...
             + hsig * sqrt(cma.cc * (2 - cma.cc) * cma.mueff) * (pop_struct.xmean - xold) / pop_struct.sigma;
    
     % Adapt covariance matrix C
     % mu difference vectors (fitness and conv information should be excluded)
-    artmp = (1 / pop_struct.sigma) * (pop(1:cma.mu, 1:pop_struct.problem_size)) - repmat(xold, cma.mu, 1);
+    artmp = (1 / pop_struct.sigma) * (pop(1:mu, 1:pop_struct.problem_size)) - repmat(xold, mu, 1);
     artmp = artmp';
     %TODO 这里检查一下由原来的公式的列向量变成了行向量
     pop_struct.C = (1 - cma.c1 - cma.cmu) * pop_struct.C ... % regard old matrix
@@ -46,10 +48,11 @@ function [pop_struct,cma]= update_cma(pop_struct,nfes)
     pop_struct.sigma = pop_struct.sigma * exp((cma.cs / cma.damps) * (norm(pop_struct.ps) / cma.chiN - 1));
     
     %TODO check here how to achieve O(N^2)
-    if nfes - pop_struct.eigeneval > pop_struct.popsize * 2 / (cma.c1 + cma.cmu) / pop_struct.problem_size / 10
+    if nfes - pop_struct.eigeneval > lambda / (cma.c1 + cma.cmu) / pop_struct.problem_size / 10
         pop_struct.eigeneval  = nfes;
         pop_struct.C = triu(pop_struct.C) + triu(pop_struct.C, 1)';
-        [pop_struct.B,pop_struct.D] = eig(pop_struct.C);
+        [pop_struct.B,pop_struct.D] = eig(pop_struct.C); % TODO 这里的pop_struct.B 应该需要专职
+        pop_struct.B = pop_struct.B';
         pop_struct.D = sqrt(diag(pop_struct.D));
         pop_struct.invsqrtC = pop_struct.B * diag(pop_struct.D .^ -1) * pop_struct.B';
     end   
