@@ -6,7 +6,7 @@ function sorted_pop = sort_fr(pop)
     % 2) in all infeasible individuals, less conv is preferred
     % less function value is considered better individuals
 
-% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
+% Version 1.4 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
 
     feasible_index = find(pop(:, end) == 0); % indicies
     % feasible_index will be a zero vector, if there is no feasible individuals

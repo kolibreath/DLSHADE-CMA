@@ -51,37 +51,7 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
     f_w = gnFw(nfes,max_nfes,f);
     vi = base_vectors + f_w(: , ones(1, problem_size)) .* (pbetter - base_vectors)...
        + f(: , ones(1, problem_size)).* (pop(r1, :) - popAll(r2, :));
-   
-    if sum(sum(isnan(vi))) 
-                disp('fuck');
-    end
-     
-   vi = boundConstraint(vi,pop,r0,lu);
-    
-     if sum(sum(isnan(vi))) 
-                disp('fuck');
-     end
 
-    % mutation without CMA-ES
-%     pNP = max(round(popsize*0.11), 2); %% choose at least two best solutions
-%     randindex = ceil(rand(1, popsize) .* pNP); %% select from [1, 2, 3, ..., pNP]
-%     randindex = max(1, randindex); %% to avoid the problem that rand = 0 and thus ceil(rand) = 0
-%     pbest = pop(randindex, :); %% randomly choose one of the top 100p% solutions TODO 这个应该是排序之后的选择，检查！
-% 
-%     r0 = [1:popsize];
-%     popAll = [pop; archive.pop];
-%     [r1, r2] = gnR1R2(popsize, size(popAll, 1), r0);
-%     
-%     % these variable just copies of those outside this function scope
-%     pop = pop(:,1:problem_size);
-%     pbest = pbest(:,1:problem_size);
-%     popAll = popAll(:,1:problem_size);
-%     
-%     vi = pop + f(: , ones(1, problem_size)) .* (pbest(:,1:problem_size) ...
-%              - pop(:,1:problem_size)...
-%              + pop(r1, :) - popAll(r2, :));
-%     vi = boundConstraint(vi, pop, lu);
-    
     % crossover
     mask = rand(lambda, problem_size) > cr(:, ones(1, problem_size)); % mask is used to indicate which elements of ui comes from the parent
     rows = (1:lambda)'; 
@@ -89,9 +59,6 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
     jrand = sub2ind([lambda problem_size], rows, cols); mask(jrand) = false;
     ui = vi; 
     ui(mask) = base_vectors(mask);
-    if sum(sum(isnan(ui))) 
-                disp('fuck');
-    end
 
 end
 

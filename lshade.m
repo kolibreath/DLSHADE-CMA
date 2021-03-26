@@ -33,6 +33,10 @@ for func = 1:28
     fprintf('\n-------------------------------------------------------\n')
 
     
+    %% TODO 删除了LPSR 技术，需要采用替代策略增加选择
+    %% TODO 测试在后续的函数上的问题
+    %% TODO 1） 增加多种变异策略（不一定有提高） 2）在较好的解个体的选择方面，排序的方法全部考虑pfs
+    %% TODO 有时候还会出现矩阵分解的错误
     %% for each problem size
     for dim_num = 1:1
       problem_size = Dimension_size(dim_num);
