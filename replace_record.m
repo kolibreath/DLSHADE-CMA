@@ -1,5 +1,5 @@
 function [pop, archive, suc_f, suc_cr, delta_k] = replace_record(pop,k,cur_off,archive,cur_par,suc_f,suc_cr,f,cr,delta_k)                                                               
-% REPLACE_RECORD replace defeated parent into archive and record successful
+% REPLACE_RECORD replace defeated parent into the archive and record successful f and cr
 % input: 
     % pop       -- population
     % k         -- k_th parent in population is replaced

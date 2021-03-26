@@ -1,6 +1,6 @@
 function [r1, r2] = gnR1R2(NP1, NP2, r0)
 
-% gnA1A2 generate two column vectors r1 and r2 of size NP1 & NP2, respectively
+% gnR1R2 generate two column vectors r1 and r2 of size NP1 & NP2, respectively
 %    r1's elements are choosen from {1, 2, ..., NP1} & r1(i) ~= r0(i)
 %    r2's elements are choosen from {1, 2, ..., NP2} & r2(i) ~= r1(i) & r2(i) ~= r0(i)
 %

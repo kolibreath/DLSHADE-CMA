@@ -1,20 +1,12 @@
 function cma = assem_cma(problem_size,popsize)
 %ASSEM_CMA_STRUCT construct a struct stores CMA related constants
 % input:
-    % lu            -- lower and upper bounds of problem
     % problem_size  -- problem size
     % popsize       -- size of population
 % output:
     % cma           -- construct CMA related information into cma (struct)
-% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/20
-    %% 
-    % Note: compare to xmean in pop struct, what 'xmean','sigma' variable here is closer to a 'global variable'
-    % 'xmean' etc. in pop struct will adapt themselves, and 'xmean' etc. remain unchanged
-    %TODO CMA-ES原算法中有stop condition 之后测试一下需不需要加上！
-    cma.stopfitness = 1e-10;
-    % two meanings: 
-    %   1) top p% of population based on feasibility or constraint violation  in LSHADE framework
-    %   2) used in CMA to update xmean and some other parameters
+% Version 1.4 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/20
+
     mu = popsize; % (number of parent) 
     weights = log(mu + 1/2) - log(1:mu); % 1 * mu  vector for weighted recombination
     weights = weights / sum(weights); 

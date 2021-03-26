@@ -7,7 +7,7 @@ function sorted_pop = sort_fo(pop)
 % Steps:
     % 1) individual has better fitness wins
 
-    % Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
+    % Version 1.4 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
 
     [~,fitness_sorted_index] = sort(pop(:,end-1),'ascend');
     sorted_pop = [pop(fitness_sorted_index, :)];

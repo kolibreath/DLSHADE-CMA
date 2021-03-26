@@ -3,10 +3,11 @@ function [pop_struct,cma]= update_cma(pop_struct,nfes)
 % input:
     % pop_struct    -- population struct and population is sorted by
     % sort_ec or sort_fr
+    % nfes          -- fitness evaluation 
 % output: 
     % pop_struct    -- population struct with its updated memebers
     % cma           -- updated CMA struct 
-% Version 1.3 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/24
+% Version 1.4 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/24
 %UPDATE_CMA update parameters in CMA
 
     pop = pop_struct.pop;

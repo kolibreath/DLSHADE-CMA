@@ -4,16 +4,16 @@ function pop_struct = assem_pop(pop,popsize, problem_size,C,D,B,invsqrtC,eigenev
     % pop           -- population (pop_fr or pop_ec)
     % popsize       -- population size
     % problem_size  -- problem size
-    % xmean         -- mean value of the distribution
     % C,D,B         -- CMA-related parameters
     % invsqrtC      -- C ^ (- 1/2)
     % eigeneval     -- eigene value
-    % cma           -- cma struct for Covariance Matrix Adaptation parameters
-    % tag           -- tag == 1 -> pop_fr; tag == 2 -> pop_ec
+    % xmean         -- mean value of distribution
+    % sigma         -- step  size
+
 % output:
     % pop_struct           -- struct of pop after assembling
 
-% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
+% Version 1.4 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
 
 %% 
     pop_struct.pop = pop;

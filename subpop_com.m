@@ -2,7 +2,7 @@ function [pop_fr_struct,pop_fo_struct, delete_individual] = subpop_com(pop_fr_st
 %SUBPOP_COM communication between subpopulations
 % inputs:
     % pop_fr_struct                -- population struct using feasibility rule
-    % pop_fo_struct                -- population struct using no constraint handling technique (fitness only)
+    % pop_fo_struct                -- population struct using no constraint handling technique 
     % archive_fr                   -- defeated offspring in pop_fr
     % archive_fo                   -- defeated offpspring in pop_fo
 % outputs:
@@ -14,7 +14,7 @@ function [pop_fr_struct,pop_fo_struct, delete_individual] = subpop_com(pop_fr_st
     % 2) sort unions by sort_fr and sort_ec respectively
     % 3) delete overflowing individuals
     
-% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
+% Version 1.4 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
     
 %%
     pop_fr = pop_fr_struct.pop;

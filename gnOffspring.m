@@ -1,18 +1,18 @@
 function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
 %GNOFFSPRING generate offspring by DE/current-to-pbetter*/
 % input:
-    % pop                   -- population of individuals (pop_fr or pop_ec)
-    % lu                    -- lower and upper bounds 
-    % archive               -- archvie stores defeated parents
-    % f                     -- generated scale factor f
-    % cr                    -- generated crossover rate cr
+    % pop_struct                   -- struct of population
+    % lu                           -- lower and upper bounds 
+    % archive                      -- archvie stores defeated parents
+    % f                            -- generated scale factor f
+    % cr                           -- generated crossover rate cr
 % output:
-    % ui                    -- individual after mutation and crossover
-    % r0                    -- base vector index
+    % ui                           -- individual after mutation and crossover
+    % r0                           -- base vector index
 
 % Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
 
-    %% DE/current-to-pbest mutation and crossover
+    %% DE/current-to-pbest* mutation and crossover
     pop = pop_struct.pop;
     popsize = pop_struct.popsize;
     problem_size = pop_struct.problem_size;

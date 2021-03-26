@@ -1,9 +1,10 @@
 function [f, cr] = gnFCR(popsize,memory_size,memory_sf,memory_scr)
-%GENFCR generate popsize * 1 F and CR vector
+%GENFCR the size of population is lambda, and gnFCR will generate lambda * 1 vectors of f and crossover rate
     %  input: 
-        % popsize      -- the size of population
-        % mu_f         -- mean value of distribution generating f
-        % mu_cr        -- mean value of distribution generating cr
+        % popsize           -- the size of population
+        % memory_size       -- memory size of successful F and CR record
+        % memory_sf         -- memory of scale factor f
+        % memory_cr         -- memory of scale factor f cr
     %  output:
         % F            -- the vector of scale factor   (vector of lambda * 1)
         % CR           -- the vector of crossover rate (vector of lambda * 1)

@@ -20,7 +20,7 @@ function [pop_struct, archive_fo, archive, suc_f, suc_cr, delta_k] = update_pop_
 % Steps:
     % 1) rank individuals in pop_fo based on solely fitness
     % 2) better fitness wins
-    % Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
+    % Version 1.4 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
 
     %%
     suc_cr = [];
@@ -39,6 +39,7 @@ function [pop_struct, archive_fo, archive, suc_f, suc_cr, delta_k] = update_pop_
         par_fit = cur_par(end - 1);
         off_fit = cur_off(end - 1);
 
+        % TODO 这里可以修改，因为这个地方选入suc_f 和 suc_cr 中的F和CR可能都是来自同一个父代的子代，这些子代没有进行选拔比较
         % individual which has better fitness survive
         if par_fit > off_fit
             % parent is defeated
