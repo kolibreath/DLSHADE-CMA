@@ -17,8 +17,11 @@ function sorted_pop = sort_fr(pop)
         % sort based on fitness (function value)
         [~, sorted_feasible_indices] = sort(feasible_individuals(:,end-1), 'ascend');    
     end
-     
-    infeasible_individuals = pop( ~feasible_index); 
+    [popsize,~] = size(pop);
+    all_index = 1:popsize;
+    all_index(feasible_index) = [];
+    infeasible_index = all_index;
+    infeasible_individuals = pop(infeasible_index,:); 
     if ~any(infeasible_individuals)
         sorted_infeasible_indices = [];
     else     

@@ -185,7 +185,6 @@ for func = 1:28
             [pop_fr_struct,pop_fo_struct,delete_individuald] ...
                 = subpop_com(pop_fr_struct,pop_fo_struct, ...
                   archive_fr,archive_fo);
-              
             % TODO 如果同时对两个子种群施加LSPR这样的变化是否太大了？
 %             pop_fo_struct = resize_pop(max_popsize,min_popsize,pop_fo_struct,max_nfes,nfes);
 %             pop_fr_struct = resize_pop(max_popsize,min_popsize,pop_fr_struct,max_nfes,nfes);
