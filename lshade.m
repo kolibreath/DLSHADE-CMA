@@ -147,11 +147,17 @@ for func = 1:28
         clear cma;
 
         %% -------------------------------- main loop -------------------------------
+        sigma_gen = 20; 
+        gen = 0; % after every sigma_gen generations, output the mean of sigma 
+        sigma_record_fr = [];
+        sigma_record_fo = [];
         while nfes < max_nfes
+            memory_w_fr = memory_weights(sigma_record_fr, sigma_gen, memory_size, memory_sf);
+            memory_w_fo = memory_weights(sigma_record_fo, sigma_gen, memory_size, memory_sf);
             
             %% generate f and cr for subpopulations respectively
-            [f_fr, cr_fr] = gnFCR(pop_fr_struct.popsize,memory_size,memory_sf,memory_scr);
-            [f_fo, cr_fo] = gnFCR(pop_fo_struct.popsize,memory_size,memory_sf,memory_scr);
+            [f_fr, cr_fr] = gnFCR(pop_fr_struct.popsize,memory_size,memory_sf,memory_scr,memory_w_fr);
+            [f_fo, cr_fo] = gnFCR(pop_fo_struct.popsize,memory_size,memory_sf,memory_scr,memory_w_fo);
             
             % Note: ui_fr and ui_fo are un-evaluated matrix (lambda * problem_size)
             [ui_fr,base_fr] = gnOffspring(pop_fr_struct,lu,archive,nfes,max_nfes,f_fr,cr_fr);
@@ -230,7 +236,10 @@ for func = 1:28
                 end
                 k =k +1;
             end
-            
+           gen = gen + 1;
+           sigma_record_fr = [sigma_record_fr; pop_fr_struct.sigma];
+           sigma_record_fo = [sigma_record_fo; pop_fo_struct.sigma];
+          
         end % end of while
         fprintf('run= %d, fitness = %d\n, conv = %d\n' ,run_id,bsf_solution(end-1),bsf_solution(end));
         
