@@ -45,7 +45,7 @@ function [pop_struct, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_f
     
     % compare between offspring individual and parent
     for k = 1 : lambda
-       cur_par = pop(base_index,:);
+       cur_par = pop(base_index(k),:);
        cur_off = ui(k,:);
        
        par_fit = cur_par(end - 1);

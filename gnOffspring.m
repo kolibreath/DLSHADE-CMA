@@ -24,7 +24,6 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
     [~, columns] = size(pop);  % columns = N + 2 (fitness and conV)
     % TODO 在搜索前期，pfs比较小，需要多选择conv进行排序， 在搜索后期，根据fitness排序
     % TODO 可以采取不同的mutation 策略
-    % TODO 如果使用正态分布产生pbetter sort的意义没法体现！
     if rand  > pfs % sorted by conV
         pop = sortrows(pop, columns);
     else
@@ -40,9 +39,17 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
 
     pop = pop(:,1:problem_size);
     pbetter = zeros(lambda,problem_size);
+    %TODO 设置这里pbest 概率 为 0.3
+    pbest_rate = 0.3;
     for k = 1: lambda
-        pbetter(k,:) = (pop_struct.xmean' + pop_struct.sigma ...
-          * pop_struct.B * (pop_struct.D .* randn(problem_size, 1)))';
+        % 可能有部分来自best
+        if rand < 0.5
+            pbetter(k,:) = (pop_struct.xmean' + pop_struct.sigma ...
+              * pop_struct.B * (pop_struct.D .* randn(problem_size, 1)))';
+        else
+            temp = ceil(pbest_rate * popsize);
+            pbetter(k,:) = pop(ceil(temp * rand),:);
+        end
     end
     
     popAll = popAll(:,1:problem_size);
@@ -51,7 +58,7 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
     f_w = gnFw(nfes,max_nfes,f);
     vi = base_vectors + f_w(: , ones(1, problem_size)) .* (pbetter - base_vectors)...
        + f(: , ones(1, problem_size)).* (pop(r1, :) - popAll(r2, :));
-
+    vi = boundConstraint(vi,pop,r0,lu);
     % crossover
     mask = rand(lambda, problem_size) > cr(:, ones(1, problem_size)); % mask is used to indicate which elements of ui comes from the parent
     rows = (1:lambda)'; 
@@ -59,7 +66,7 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
     jrand = sub2ind([lambda problem_size], rows, cols); mask(jrand) = false;
     ui = vi; 
     ui(mask) = base_vectors(mask);
-
+    
 end
 
 function f_w = gnFw(nfes,max_nfes,f)
@@ -68,7 +75,8 @@ function f_w = gnFw(nfes,max_nfes,f)
     elseif nfes > floor(0.2 * max_nfes) && nfes <= floor(0.4 * max_nfes)
         f_w = 0.8*f;
     else
-        f_w = 1.2*f;
+        % TODO 改了这里 1.2
+        f_w = 0.5*f;
     end
 end
 

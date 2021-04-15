@@ -231,17 +231,14 @@ for func = 1:28
                 k =k +1;
             end
             
-            if mod(nfes,500) == 0
-                fprintf('process  ------- %f\n' ,nfes/max_nfes);      
-            end
         end % end of while
         fprintf('run= %d, fitness = %d\n, conv = %d\n' ,run_id,bsf_solution(end-1),bsf_solution(end));
-        disp(bsf_solution);
+        
+        %disp(bsf_solution);
        end %% end 1 run
     
     end %% end of iterate one problem size
    
 
     fprintf('\n')
-%     fprintf('mean error value = %1.8e, std = %1.8e\n', mean(outcome), std(outcome))
 end %% end 1 function run

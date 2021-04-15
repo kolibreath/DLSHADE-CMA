@@ -43,9 +43,10 @@ function [pop_struct,cma]= update_cma(pop_struct,nfes)
            + cma.cmu * artmp * diag(cma.weights) * artmp'; % plus rank mu update
        
     sigma = pop_struct.sigma * exp((cma.cs / cma.damps) * (norm(pop_struct.ps) / cma.chiN - 1));
-    if sigma >= 1e-6
+    if sigma >= 1e-6 && sigma <= 200
        pop_struct.sigma = sigma;
     end
+    
     
     %TODO check here how to achieve O(N^2)
     if nfes - pop_struct.eigeneval > lambda / (cma.c1 + cma.cmu) / pop_struct.problem_size / 10
