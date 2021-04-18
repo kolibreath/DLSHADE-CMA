@@ -34,7 +34,11 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
     % select lambda parent as base vector 
     lambda = pop_struct.lambda;
     r0 = ceil(rand(1,lambda) * popsize);
-    popAll = [pop; archive.pop];
+    try
+        popAll = [pop; archive.pop];
+    catch
+        disp("");
+    end
     [r1, r2] = gnR1R2(popsize, size(popAll, 1), r0);
 
     pop = pop(:,1:problem_size);

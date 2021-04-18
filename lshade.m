@@ -150,6 +150,7 @@ for func = 1:28
         gen = 0; % after every sigma_gen generations, output the mean of sigma 
         bsf_index = 0;
         bsf_gen_len = 10 + ceil(30*problem_size/lambda);
+        bsf_unchange_counter = 0;
         sigma_record_fr = [];
         sigma_record_fo = [];
         while nfes < max_nfes
@@ -227,14 +228,19 @@ for func = 1:28
            % update last_bsf_solution after every bsf_len generation
            if temp > bsf_index
                last_bsf_solution = bsf_solution;
+               if all(last_bsf_solution == bsf_solution)
+                   bsf_unchange_counter = bsf_unchange_counter + 1;
+               end
                bsf_index = temp;
            end
-           [restart_index_fr, restart_index_fo] = stop_trigger(last_bsf_solution,bsf_solution,pop_fr_struct,pop_fo_struct);
+           [restart_index_fr, restart_index_fo] = stop_trigger(bsf_unchange_counter,pop_fr_struct,pop_fo_struct);
            if restart_index_fr == 1
-               pop_fr_struct = restart_pop(pop_fr_struct);
+               pop_fr_struct = restart_pop(pop_fr_struct,func);
+               nfes = nfes + pop_fr_struct.popsize;
            end
            if restart_index_fo == 1
-               pop_fo_struct = restart_pop(pop_fo_struct);
+               pop_fo_struct = restart_pop(pop_fo_struct,func);
+               nfes = nfes + pop_fo_struct.popsize;
            end
            
            gen = gen + 1;
