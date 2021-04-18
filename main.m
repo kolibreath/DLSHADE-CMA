@@ -21,14 +21,14 @@ global initial_flag ; % for CEC2017 test function evaluation
 
 rand('seed', sum(100 * clock));
 
-for func = 1:28
+for func = 5:5
 
     optimum = func * 100.0;
     %% PARAMETER SETTINGS FOR PROBLEM SIZE
     Dimension_size = [10, 30, 50, 100];
     
     %% Record the best results
-    outcome = [];
+
 
     fprintf('\n-------------------------------------------------------\n')
 
@@ -42,7 +42,7 @@ for func = 1:28
       
       %% for each run:
       for run_id = 1:1
-        
+        outcome = [];
         bsf_solution = zeros(problem_size + 4, 1);
         bsf_solution(end-1) = inf;
         bsf_solution(end)   = inf;
@@ -76,7 +76,7 @@ for func = 1:28
         
         %% PARAMETER SETTINGS FOR COVARIANCE ADAPTATION MATIRX (CMA)
         cma = assem_cma(problem_size,lambda);
-        sigma_lu = [1e-6, min((lu(2)-lu(1))/2)];
+        sigma_lu = [1e-20, min((lu(2)-lu(1))/2)];
       
 
         %% INTIIALIZE THE POPULATION
@@ -217,11 +217,14 @@ for func = 1:28
            sigma_record_fo = [sigma_record_fo; pop_fo_struct.sigma];
            
            gen = gen + 1;
+           
+           outcome = [outcome; [gen, bsf_solution(end-1)] ];
         end % end of while
         fprintf('run= %d, fitness = %d\n, conv = %d\n' ,run_id,bsf_solution(end-1),bsf_solution(end));
        end %% end 1 run
        fprintf("---------------------------------------------------\n");
        fprintf('fitness = %d\n, conv = %d\n' ,bsf_solution(end-1),bsf_solution(end));
+       plot(outcome);
     
     end %% end of iterate one problem size
    
