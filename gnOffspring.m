@@ -24,12 +24,7 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
     [~, columns] = size(pop);  % columns = N + 2 (fitness and conV)
     % TODO 在搜索前期，pfs比较小，需要多选择conv进行排序， 在搜索后期，根据fitness排序
     % TODO 可以采取不同的mutation 策略
-    if rand  > pfs % sorted by conV
-        pop = sortrows(pop, columns);
-    else
-        pop = sortrows(pop, columns - 1);
-    end
-    
+
     %% mutation
     % select lambda parent as base vector 
     lambda = pop_struct.lambda;
@@ -43,12 +38,12 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
     pbest_rate = 0.3;
     for k = 1: lambda
         % 可能有部分来自best
-        if rand < 0.5
+        if rand < 0.7
             pbetter(k,:) = (pop_struct.xmean' + pop_struct.sigma ...
               * pop_struct.B * (pop_struct.D .* randn(problem_size, 1)))';
         else
             temp = ceil(pbest_rate * popsize);
-            pbetter(k,:) = pop(ceil(temp * rand),:);
+            pbetter(k,:) = pop(randi(temp),:);
         end
     end
     

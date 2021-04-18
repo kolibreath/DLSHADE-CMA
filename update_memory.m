@@ -14,7 +14,7 @@ function [memory_sf,memory_scr,memory_pos] = update_memory(suc_f,suc_cr,memory_s
     % memory_pos            -- position in memory
     num_success_params = numel(suc_cr);
     if num_success_params > 0
-        dif_val = weights_lshade(delta_k);
+        dif_val = delta_k ./ sum(delta_k);
 
         %% for updating the memory of scaling factor
         memory_sf(memory_pos) = (dif_val' * (suc_f.^2)) / (dif_val' * suc_f);

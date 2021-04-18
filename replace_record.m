@@ -30,8 +30,7 @@ function [pop, archive, suc_f, suc_cr, delta_k] = replace_record(pop,k,cur_off,a
   suc_f = [suc_f; f(k)];
   suc_cr = [suc_cr;cr(k)];
   
-  % delta_k(par_conv, par_fit, off_conv, off_fit)
+  % delta_k(par_conv, par_fit, off_conv, off_fiWt)
   delta_fitness = max(cur_par(end-1) - cur_off(end-1), 0);
-  delta_conv    = max(cur_par(end) - cur_off(end), 0);
-  delta_k =  [delta_k;[delta_fitness, delta_conv]];
+  delta_k =  [delta_k;delta_fitness];
 end

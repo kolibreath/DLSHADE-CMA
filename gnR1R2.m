@@ -23,7 +23,7 @@ function [r1, r2] = gnR1R2(NP1, NP2, r0)
         else % regenerate r1 if it is equal to r0
             r1(pos) = floor(rand(1, sum(pos)) * NP1) + 1;
         end
-        if i > 1000, % this has never happened so far
+        if i > 1000 % this has never happened so far
             error('Can not genrate r1 in 1000 iterations');
         end
     end
