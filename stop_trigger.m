@@ -1,4 +1,4 @@
-function [restart_index_fr, restart_index_fo] = stop_trigger(bsf_unchanged_counter,pop_fr_struct,pop_fo_struct)
+function [restart_index_fr, restart_index_fo,bsf_unchanged_counter] = stop_trigger(bsf_unchanged_counter,pop_fr_struct,pop_fo_struct)
 %STOP_TRIGGER check if cma meets the criteria of restart
 % input:
     % pop_struct            -- struct of population information
@@ -7,12 +7,13 @@ function [restart_index_fr, restart_index_fo] = stop_trigger(bsf_unchanged_count
 % output:
     % valid                 -- valid == 1 -> restart; valid == 0 -> no restart
     
-    Tolfun = 1e-12;
     % the "best so far solution" in the last 10 + floor(30 * problem_size / lambda) generation 
     
     %% condition 1: 
-    if bsf_unchanged_counter > 500
-       restart_index_fo = 1; restart_index_fr = 1;
+    if bsf_unchanged_counter > 50
+       restart_index_fo = 1; 
+       restart_index_fr = 1;
+       bsf_unchanged_counter = 0;
        return;
     end
     

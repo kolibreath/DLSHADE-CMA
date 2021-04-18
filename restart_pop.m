@@ -1,12 +1,13 @@
-function pop_struct = restart_pop(pop_struct,func)
+function [pop_struct] = restart_pop(pop_struct,func)
 %RESTART_POP 此处显示有关此函数的摘要
 %   此处显示详细说明
        % pick of the best individuals as a initial point
        problem_size = pop_struct.problem_size;
        popsize = pop_struct.popsize;
        
-       initial_index = randi(floor(0.3 * popsize));
-       xmean = pop_struct.pop(initial_index,1:problem_size);
+%        initial_index = randi(floor(0.3 * popsize));
+%        xmean = pop_struct.pop(initial_index,1:problem_size);
+       xmean = rand(1,problem_size) .* (lu(2)-lu(1));
        
        popsize = popsize * 2; 
        
@@ -31,5 +32,6 @@ function pop_struct = restart_pop(pop_struct,func)
       
        pop_struct = assem_pop(pop,popsize,lambda, ... 
        problem_size,C,D,B,invsqrtC,eigeneval,xmean,sigma);
+
 end
 
