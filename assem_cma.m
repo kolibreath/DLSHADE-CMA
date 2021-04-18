@@ -2,10 +2,10 @@ function cma = assem_cma(problem_size,lambda)
 %ASSEM_CMA_STRUCT construct a struct stores CMA related constants
 % input:
     % problem_size  -- problem size
-    % popsize       -- size of population
+    % lambda        -- size of offspring population
 % output:
     % cma           -- construct CMA related information into cma (struct)
-% Version 1.4 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/20
+% Version 1.5 Author: Shi Zeyuan 734780178@qq.com Date: 2021/4/18
 
     mu = lambda / 2; % (number of parent) 
     weights = log(mu + 1/2) - log(1:mu); % 1 * mu  vector for weighted recombination
@@ -24,8 +24,8 @@ function cma = assem_cma(problem_size,lambda)
     cma.cmu = min(1 - c1, 2 * (mueff - 2 + 1 / mueff) / ((problem_size + 2)^2 + mueff)); % and for rank-mu update
     cma.damps = 1 + 2 * max(0, sqrt((mueff - 1) / (problem_size + 1)) - 1) + cs; % damping for sigma  usually close to 1
         
-    % in the proposed algorithm, CMA-ES give the control of pc and ps
-    % including its update to the evolution of subpopulations
+    % in the proposed algorithm, Covariance matrix adaptation process give the control 
+    % of pc and ps including its update to the evolution of subpopulations
 %     % Initialize dynamic (internal) strategy parameters and constants
 %     cma.pc = zeros(1, problem_size);  
 %     cma.ps = zeros(1, problem_size); % evolution paths for C and sigma

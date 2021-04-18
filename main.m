@@ -32,41 +32,38 @@ for func = 1:28
 
     fprintf('\n-------------------------------------------------------\n')
 
-    
-    %% TODO 删除了LPSR 技术，需要采用替代策略增加选择
-    %% TODO 测试在后续的函数上的问题
-    %% TODO 1） 增加多种变异策略（不一定有提高） 2）在较好的解个体的选择方面，排序的方法全部考虑pfs
-    %% TODO 有时候还会出现矩阵分解的错误
     %% for each problem size
-    for dim_num = 1:1
+    for dim_num = 2:2
+        
       problem_size = Dimension_size(dim_num);
       initial_flag = 0;
       fprintf('Function = %d, Dimension size = %d\n', func, problem_size)
-      
-      bsf_solution = zeros(problem_size + 4, 1);
-      bsf_solution(end-1) = inf;
-      bsf_solution(end)   = inf;
-      
-      last_bsf_solution = bsf_solution;
+
       
       %% for each run:
       for run_id = 1:1
+        
+        bsf_solution = zeros(problem_size + 4, 1);
+        bsf_solution(end-1) = inf;
+        bsf_solution(end)   = inf;
+      
+        last_bsf_solution = bsf_solution;
         
         lu = decision_range(func, problem_size)';  % 2 * problem_size matrix
         max_nfes = 10000* problem_size;
         nfes = 0;
         
         %% PARAMETER SETTINGS FOR FROFI
-        %% PARAMETER SETTINGS FOR LSHADE
+        %% PARAMETER SETTINGS FOR SHADE 
         p_best_rate = 0.11;
         arc_rate = 1.4;         % archive for saving defeated parents
         memory_size = 5;        % memory for successful F and CR
                   
         %% PARAMETER SETTTINGS FOR COVARIANCE MATRIX ADAPTATION 
-        % Note: subpopulations evolve these parameters seperately
+        % Note: subpopulations update these parameters seperately
         % B defines the coordinate system
-        % diagonal D defines the scaling
-        % covariance matrix C   
+        % diagonal D scales the coordinate system
+        % covariance matrix C =  B * diag(D.^2) * B'; 
         lambda = 4 + floor(3*log(problem_size)); 
         popsize = floor(lambda / 2);
         B = eye(problem_size, problem_size); 
@@ -234,21 +231,21 @@ for func = 1:28
                bsf_index = temp;
            end
            [restart_index_fr, restart_index_fo] = stop_trigger(bsf_unchange_counter,pop_fr_struct,pop_fo_struct);
-           if restart_index_fr == 1
-               pop_fr_struct = restart_pop(pop_fr_struct,func);
-               nfes = nfes + pop_fr_struct.popsize;
-           end
-           if restart_index_fo == 1
-               pop_fo_struct = restart_pop(pop_fo_struct,func);
-               nfes = nfes + pop_fo_struct.popsize;
-           end
+%            if restart_index_fr == 1
+%                pop_fr_struct = restart_pop(pop_fr_struct,func);
+%                nfes = nfes + pop_fr_struct.popsize;
+%            end
+%            if restart_index_fo == 1
+%                pop_fo_struct = restart_pop(pop_fo_struct,func);
+%                nfes = nfes + pop_fo_struct.popsize;
+%            end
            
            gen = gen + 1;
         end % end of while
         fprintf('run= %d, fitness = %d\n, conv = %d\n' ,run_id,bsf_solution(end-1),bsf_solution(end));
-        
-        %disp(bsf_solution);
        end %% end 1 run
+       fprintf("---------------------------------------------------\n");
+       fprintf('fitness = %d\n, conv = %d\n' ,bsf_solution(end-1),bsf_solution(end));
     
     end %% end of iterate one problem size
    

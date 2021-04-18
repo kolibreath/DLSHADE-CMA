@@ -25,21 +25,18 @@ end
 function logic = check_subpopulation(pop_struct)
     logic = 0;
    %% condition 2:
-    TolX = 1e-12 * 0.3; % sigma_0 = 0.3
-    % number of elements in the standard deviation matrix that not smaller than TolX
-    n_sd = numel(find(abs(pop_struct.C) <= TolX));
-    % number of elements in the sigma*pc vector that not smaller than TolX
-    n_sc = numel(find(abs(pop_struct.sigma * pop_struct.pc) <= TolX));
-    n_sd_matrix = numel(pop_struct.C);
-    n_sc_vector = numel(pop_struct.pc);
-    
-    if n_sd > ceil(n_sd_matrix * 0.1) && n_sc > ceil(n_sc_vector * 0.3) 
+    TolX = 1e-21 * 0.3; % sigma_0 = 0.3
+    n_sd = all(all(abs(pop_struct.C) <= TolX));
+    n_sc = all(abs(pop_struct.sigma * pop_struct.pc) <= TolX);
+   
+    if n_sd && n_sc 
         logic = 1;
         return;
     end
     
     %% condition 3:
-    if any(pop_struct.xmean == pop_struct.xmean + 0.1 * pop_struct.sigma * pop_struct.D' * pop_struct.B)
+    if numel(find(pop_struct.xmean == pop_struct.xmean + 0.1 * ...
+            pop_struct.sigma * pop_struct.D' * pop_struct.B)) >= 2
         logic = 1;
         return;
     end
