@@ -1,8 +1,9 @@
-function pop_struct = assem_pop(pop,popsize, problem_size,C,D,B,invsqrtC,eigeneval,xmean,sigma)
+function pop_struct = assem_pop(pop,popsize,lambda,problem_size,C,D,B,invsqrtC,eigeneval,xmean,sigma)
 %ASSEM_POP assign members for subpopulation
 % input:    
     % pop           -- population (pop_fr or pop_ec)
     % popsize       -- population size
+    % lambda        -- size of offspring population
     % problem_size  -- problem size
     % C,D,B         -- CMA-related parameters
     % invsqrtC      -- C ^ (- 1/2)
@@ -29,6 +30,7 @@ function pop_struct = assem_pop(pop,popsize, problem_size,C,D,B,invsqrtC,eigenev
     % each subpopulation has its own evolution path
     pop_struct.pc = zeros(1,problem_size);
     pop_struct.ps = zeros(1, problem_size);
+    pop_struct.lambda = lambda;
     
 end
 

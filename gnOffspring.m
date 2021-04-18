@@ -32,7 +32,7 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
     
     %% mutation
     % select lambda parent as base vector 
-    lambda = popsize * 2;
+    lambda = pop_struct.lambda;
     r0 = ceil(rand(1,lambda) * popsize);
     popAll = [pop; archive.pop];
     [r1, r2] = gnR1R2(popsize, size(popAll, 1), r0);

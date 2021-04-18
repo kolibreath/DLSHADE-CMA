@@ -15,15 +15,16 @@ function [pop_struct,cma]= update_cma(pop_struct,nfes)
     pop = pop(:, 1:problem_size);
     xold = pop_struct.xmean;
     popsize = pop_struct.popsize; % mu
+    lambda = pop_struct.lambda;
     % in the LSHADE framework, the LPSR strategy is implemented, so the
     % popsize(mu) and parameters in CMA related to it will be updated as well
     % the fastest way is to reinitialized the cma struct with 'new' mu
-    cma = assem_cma(problem_size,popsize);
+    cma = assem_cma(problem_size,lambda);
 
     pop_struct.xmean =  (cma.weights)* pop; 
     % update evolution paths
     mu = popsize;
-    lambda = mu * 2;
+   
     pop_struct.ps = (1 - cma.cs) * pop_struct.ps ...
              + sqrt(cma.cs * (2 - cma.cs) * cma.mueff) * (pop_struct.xmean - xold) ... 
              * pop_struct.invsqrtC  / pop_struct.sigma;

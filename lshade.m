@@ -38,7 +38,7 @@ for func = 1:28
     %% TODO 1） 增加多种变异策略（不一定有提高） 2）在较好的解个体的选择方面，排序的方法全部考虑pfs
     %% TODO 有时候还会出现矩阵分解的错误
     %% for each problem size
-    for dim_num = 1:1
+    for dim_num = 2:2
       problem_size = Dimension_size(dim_num);
       initial_flag = 0;
       fprintf('Function = %d, Dimension size = %d\n', func, problem_size)
@@ -59,20 +59,14 @@ for func = 1:28
         p_best_rate = 0.11;
         arc_rate = 1.4;         % archive for saving defeated parents
         memory_size = 5;        % memory for successful F and CR
-        popsize = 30;          % popsize = mu (size of parent)
-        
-        %% PARAMETER SETTINGS FOR LINEAR POPULATION SIZE REDUCTION (LSPR)
-        max_popsize = popsize;
-        min_popsize = 4.0;
-        
-        %% PARAMETER SETTINGS FOR COVARIANCE ADAPTATION MATIRX (CMA)
-        cma = assem_cma(problem_size,popsize);
-        
+                  
         %% PARAMETER SETTTINGS FOR COVARIANCE MATRIX ADAPTATION 
         % Note: subpopulations evolve these parameters seperately
         % B defines the coordinate system
         % diagonal D defines the scaling
         % covariance matrix C   
+        lambda = 4 + floor(3*log(problem_size)); 
+        popsize = floor(lambda / 2);
         B = eye(problem_size, problem_size); 
         D = ones(problem_size, 1); 
         C = B * diag(D.^2) * B';
@@ -80,6 +74,10 @@ for func = 1:28
         eigeneval = 0; % track update of B and D
         xmean = rand(1,problem_size);
         sigma = 0.3;
+        
+        %% PARAMETER SETTINGS FOR COVARIANCE ADAPTATION MATIRX (CMA)
+        cma = assem_cma(problem_size,lambda);
+      
 
         %% INTIIALIZE THE POPULATION
         % individual in population will be viewed as (problem_size + 4) * 1 vector
@@ -88,11 +86,9 @@ for func = 1:28
         % the population is divided into two sub-populations, they have
         % the same (almost the same) parameters, while pop_fr using feasibility rule
         % and pop_fo using only fitness to compare between two individuals
-        popsize_fr = floor(popsize / 2);
-        popsize_fo = popsize - popsize_fr;
-
-        max_popsize = floor(max_popsize / 2);
-        min_popsize = floor(min_popsize / 2);
+        
+        popsize_fr = popsize;
+        popsize_fo = popsize;
         
         pop_fr = zeros(popsize_fr, problem_size);
         pop_fo = zeros(popsize_fo, problem_size);
@@ -118,8 +114,8 @@ for func = 1:28
         clear k; 
         
         % assign members for subpopulation
-        pop_fr_struct = assem_pop(pop_fr,popsize_fr,problem_size,C,D,B,invsqrtC,eigeneval,xmean,sigma);
-        pop_fo_struct = assem_pop(pop_fo,popsize_fo,problem_size,C,D,B,invsqrtC,eigeneval,xmean,sigma);
+        pop_fr_struct = assem_pop(pop_fr,popsize_fr,lambda,problem_size,C,D,B,invsqrtC,eigeneval,xmean,sigma);
+        pop_fo_struct = assem_pop(pop_fo,popsize_fo,lambda,problem_size,C,D,B,invsqrtC,eigeneval,xmean,sigma);
         
         %% evaluate both pop_fr and pop_fo
         % TODO test! 生成的个体都是可行解！？
@@ -156,8 +152,8 @@ for func = 1:28
             memory_w_fo = memory_weights(sigma_record_fo, sigma_gen, memory_size, memory_sf);
             
             %% generate f and cr for subpopulations respectively
-            [f_fr, cr_fr] = gnFCR(pop_fr_struct.popsize,memory_size,memory_sf,memory_scr,memory_w_fr);
-            [f_fo, cr_fo] = gnFCR(pop_fo_struct.popsize,memory_size,memory_sf,memory_scr,memory_w_fo);
+            [f_fr, cr_fr] = gnFCR(pop_fr_struct,memory_size,memory_sf,memory_scr,memory_w_fr);
+            [f_fo, cr_fo] = gnFCR(pop_fo_struct,memory_size,memory_sf,memory_scr,memory_w_fo);
             
             % Note: ui_fr and ui_fo are un-evaluated matrix (lambda * problem_size)
             [ui_fr,base_fr] = gnOffspring(pop_fr_struct,lu,archive,nfes,max_nfes,f_fr,cr_fr);
@@ -170,7 +166,7 @@ for func = 1:28
             ui_fo = evalpop(ui_fo, func);
             
             % TODO nfes 是否有重复计算 算多了
-            nfes = nfes + (pop_fr_struct.popsize + pop_fo_struct.popsize) * 2;
+            nfes = nfes + pop_fr_struct.lambda + pop_fo_struct.lambda;
             
             % updated subpopulations stored in structs
             [pop_fr_struct,archive_fr,archive,suc_f_fr,suc_cr_fr,delta_k_fr] = update_pop_fr(pop_fr_struct,ui_fr,base_fr,archive,f_fr,cr_fr);

@@ -1,7 +1,7 @@
-function [f, cr] = gnFCR(popsize,memory_size,memory_sf,memory_scr,weights)
+function [f, cr] = gnFCR(pop_struct,memory_size,memory_sf,memory_scr,weights)
 %GENFCR the size of population is lambda, and gnFCR will generate lambda * 1 vectors of f and crossover rate
     %  input: 
-        % popsize           -- the size of population
+        % pop_struct        -- information of sub populations
         % memory_size       -- memory size of successful F and CR record
         % memory_sf         -- memory of scale factor f
         % memory_cr         -- memory of scale factor f cr
@@ -12,7 +12,7 @@ function [f, cr] = gnFCR(popsize,memory_size,memory_sf,memory_scr,weights)
 % Version 1.4 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18 
 
 %%
-     lambda = popsize * 2; 
+     lambda = pop_struct.lambda; 
 %      mem_rand_index = ceil(memory_size * rand(lambda, 1));
      temp_rand = rand(lambda,1);
      % simple roulette-wheel selection of mean values of distributions 

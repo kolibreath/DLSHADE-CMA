@@ -40,7 +40,7 @@ function [pop_struct, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_f
     
     delta_k = [];
     popsize = pop_struct.popsize;
-    lambda = popsize * 2;
+    lambda = pop_struct.lambda;
     pop = pop_struct.pop;
     
     % compare between offspring individual and parent
@@ -84,10 +84,10 @@ function [pop_struct, archive_fr, archive, suc_f, suc_cr,delta_k] = update_pop_f
     end
    
     %% applying FROFI replacement strategy
-    [length,~] = size(archive_frofi);
-    if length ~= 0
-        pop = replacement(pop_struct, archive_frofi);
-    end
+%     [length,~] = size(archive_frofi);
+%     if length ~= 0
+%         pop = replacement(pop_struct, archive_frofi);
+%     end
     
     pop_struct.pop = pop;  % rewrite updated population into pop_struct
 end

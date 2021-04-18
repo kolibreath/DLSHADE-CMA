@@ -28,7 +28,7 @@ function [pop_struct, archive_fo, archive, suc_f, suc_cr, delta_k] = update_pop_
     archive_fo = [];
     delta_k = [];
     popsize = pop_struct.popsize;
-    lambda = popsize * 2; 
+    lambda = pop_struct.lambda; 
     pop = pop_struct.pop;
 
     % compare between offspring individual and parent

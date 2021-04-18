@@ -1,4 +1,4 @@
-function cma = assem_cma(problem_size,popsize)
+function cma = assem_cma(problem_size,lambda)
 %ASSEM_CMA_STRUCT construct a struct stores CMA related constants
 % input:
     % problem_size  -- problem size
@@ -7,7 +7,7 @@ function cma = assem_cma(problem_size,popsize)
     % cma           -- construct CMA related information into cma (struct)
 % Version 1.4 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/20
 
-    mu = popsize; % (number of parent) 
+    mu = lambda / 2; % (number of parent) 
     weights = log(mu + 1/2) - log(1:mu); % 1 * mu  vector for weighted recombination
     weights = weights / sum(weights); 
     mu = floor(mu);
