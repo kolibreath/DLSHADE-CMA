@@ -38,10 +38,13 @@ function [pop_struct,cma]= update_cma(pop_struct,nfes, sigma_lu)
     % mu difference vectors (fitness and conv information should be excluded)
     artmp = (1 / pop_struct.sigma) * (pop - repmat(xold, mu, 1));
     artmp = artmp';
+    
+    % apply active strategy
+    cma.weights(mu+1:end) = cma.weights(mu+1:end) * (-1);
     pop_struct.C = (1 - cma.c1 - cma.cmu) * pop_struct.C ... % regard old matrix
            + cma.c1 * (pop_struct.pc' * pop_struct.pc ... % plus rank one update
            + (1 - hsig) * cma.cc * (2 - cma.cc) * pop_struct.C) ... % minor correction if hsig==0
-           + cma.cmu * artmp * diag(cma.weights) * artmp'; % plus rank mu update
+        + cma.cmu * artmp * diag(cma.weights) * artmp' ; % plus active rank mu update
        
     sigma = pop_struct.sigma * exp((cma.cs / cma.damps) * (norm(pop_struct.ps) / cma.chiN - 1));
     if sigma >= sigma_lu(1) && sigma <= sigma_lu(2)
