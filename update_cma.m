@@ -1,4 +1,4 @@
-function [pop_struct,cma]= update_cma(pop_struct,nfes)
+function [pop_struct,cma]= update_cma(pop_struct,nfes, sigma_lu)
 % UPDATE_CMA update CMA related parameters
 % input:
     % pop_struct    -- population struct and population is sorted by
@@ -44,7 +44,7 @@ function [pop_struct,cma]= update_cma(pop_struct,nfes)
            + cma.cmu * artmp * diag(cma.weights) * artmp'; % plus rank mu update
        
     sigma = pop_struct.sigma * exp((cma.cs / cma.damps) * (norm(pop_struct.ps) / cma.chiN - 1));
-    if sigma >= 1e-6 && sigma <= 200
+    if sigma >= sigma_lu(1) && sigma <= sigma_lu(2)
        pop_struct.sigma = sigma;
     end
     
