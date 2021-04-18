@@ -220,26 +220,6 @@ for func = 1:28
            sigma_record_fr = [sigma_record_fr; pop_fr_struct.sigma];
            sigma_record_fo = [sigma_record_fo; pop_fo_struct.sigma];
            
-           %% update stop_trigger      
-           temp = floor(gen / bsf_gen_len);
-           % update last_bsf_solution after every bsf_len generation
-           if temp > bsf_index
-               last_bsf_solution = bsf_solution;
-               if all(last_bsf_solution == bsf_solution)
-                   bsf_unchange_counter = bsf_unchange_counter + 1;
-               end
-               bsf_index = temp;
-           end
-           [restart_index_fr, restart_index_fo] = stop_trigger(bsf_unchange_counter,pop_fr_struct,pop_fo_struct);
-%            if restart_index_fr == 1
-%                pop_fr_struct = restart_pop(pop_fr_struct,func);
-%                nfes = nfes + pop_fr_struct.popsize;
-%            end
-%            if restart_index_fo == 1
-%                pop_fo_struct = restart_pop(pop_fo_struct,func);
-%                nfes = nfes + pop_fo_struct.popsize;
-%            end
-           
            gen = gen + 1;
         end % end of while
         fprintf('run= %d, fitness = %d\n, conv = %d\n' ,run_id,bsf_solution(end-1),bsf_solution(end));
