@@ -38,14 +38,16 @@ for func = 1:28
     %% TODO 1） 增加多种变异策略（不一定有提高） 2）在较好的解个体的选择方面，排序的方法全部考虑pfs
     %% TODO 有时候还会出现矩阵分解的错误
     %% for each problem size
-    for dim_num = 2:2
+    for dim_num = 1:1
       problem_size = Dimension_size(dim_num);
       initial_flag = 0;
       fprintf('Function = %d, Dimension size = %d\n', func, problem_size)
       
       bsf_solution = zeros(problem_size + 4, 1);
-      bsf_solution(end-1) = 1e+30;
-      bsf_solution(end)   = 1e+30;
+      bsf_solution(end-1) = inf;
+      bsf_solution(end)   = inf;
+      
+      last_bsf_solution = bsf_solution;
       
       %% for each run:
       for run_id = 1:1
@@ -77,6 +79,7 @@ for func = 1:28
         
         %% PARAMETER SETTINGS FOR COVARIANCE ADAPTATION MATIRX (CMA)
         cma = assem_cma(problem_size,lambda);
+        sigma_lu = [1e-6, min((lu(2)-lu(1))/2)];
       
 
         %% INTIIALIZE THE POPULATION
@@ -145,6 +148,8 @@ for func = 1:28
         %% -------------------------------- main loop -------------------------------
         sigma_gen = 20; 
         gen = 0; % after every sigma_gen generations, output the mean of sigma 
+        bsf_index = 0;
+        bsf_gen_len = 10 + ceil(30*problem_size/lambda);
         sigma_record_fr = [];
         sigma_record_fo = [];
         while nfes < max_nfes
@@ -183,7 +188,7 @@ for func = 1:28
 
             %% resize the population size of pop_fo and pop_fr
            
-            % Note: population in structs are sorted
+            % --- Note: population in structs are sorted ---
             [pop_fr_struct,pop_fo_struct,delete_individuald] ...
                 = subpop_com(pop_fr_struct,pop_fo_struct, ...
                   archive_fr,archive_fo);
@@ -201,41 +206,38 @@ for func = 1:28
                archive.pop = archive.pop(rndpos, :);
             end
 
-            % CMA parameters update 
-            [pop_fr_struct] = update_cma(pop_fr_struct,nfes);
-            [pop_fo_struct] = update_cma(pop_fo_struct,nfes);
+            % CMA parameters update (populations in pop_fr and pop_fo are sorted)
+            [pop_fr_struct] = update_cma(pop_fr_struct,nfes,sigma_lu);
+            [pop_fo_struct] = update_cma(pop_fo_struct,nfes,sigma_lu);
             
             if max(pop_fr_struct.D) > 1e7 * min(pop_fr_struct.D) || max(pop_fo_struct.D) > 1e7 * min(pop_fo_struct.D)
                break;
             end
             
-            %% update best so far solution
-            % TODO conv 可能小于0 ??
-            k = 1;
-            while k < pop_fr_struct.popsize && k < pop_fo_struct.popsize
-                off_fr = pop_fr_struct.pop(k,:);
-                off_fo = pop_fo_struct.pop(k,:);
-                % better in conv
-                if off_fr(end) < bsf_solution(end)
-                    bsf_solution = off_fr;
-                % equal conv better in fitness
-                elseif off_fr(end) == bsf_solution(end) && off_fr(end-1) < bsf_solution(end-1)
-                    bsf_solution = off_fr;
-                end
-                
-                % better in conv
-                if off_fo(end) < bsf_solution(end)
-                    bsf_solution = off_fo;
-                % equal conv better in fitness
-                elseif off_fo(end) == bsf_solution(end) && off_fo(end-1) < bsf_solution(end-1)
-                    bsf_solution = off_fo;
-                end
-                k =k +1;
-            end
-           gen = gen + 1;
+           %% update best so far solution
+           bsf_solution = find_bsf(pop_fr_struct,pop_fo_struct,bsf_solution);
+          
+           
+           %% update sigma record
            sigma_record_fr = [sigma_record_fr; pop_fr_struct.sigma];
            sigma_record_fo = [sigma_record_fo; pop_fo_struct.sigma];
-          
+           
+           %% update stop_trigger      
+           temp = floor(gen / bsf_gen_len);
+           % update last_bsf_solution after every bsf_len generation
+           if temp > bsf_index
+               last_bsf_solution = bsf_solution;
+               bsf_index = temp;
+           end
+           [restart_index_fr, restart_index_fo] = stop_trigger(last_bsf_solution,bsf_solution,pop_fr_struct,pop_fo_struct);
+           if restart_index_fr == 1
+               pop_fr_struct = restart_pop(pop_fr_struct);
+           end
+           if restart_index_fo == 1
+               pop_fo_struct = restart_pop(pop_fo_struct);
+           end
+           
+           gen = gen + 1;
         end % end of while
         fprintf('run= %d, fitness = %d\n, conv = %d\n' ,run_id,bsf_solution(end-1),bsf_solution(end));
         
