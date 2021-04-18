@@ -33,7 +33,7 @@ for func = 1:28
     fprintf('\n-------------------------------------------------------\n')
 
     %% for each problem size
-    for dim_num = 2:2
+    for dim_num = 1:1
         
       problem_size = Dimension_size(dim_num);
       initial_flag = 0;
@@ -222,17 +222,17 @@ for func = 1:28
                bsf_index = temp;
            end
            % restart only happens at the late stage of the search
-           if nfes >= max_nfes * 0.8
-               [restart_index_fr, restart_index_fo] = stop_trigger(bsf_unchange_counter,pop_fr_struct,pop_fo_struct);
-               if restart_index_fr == 1
-                   pop_fr_struct = restart_pop(pop_fr_struct,func);
-                   nfes = nfes + pop_fr_struct.popsize;
-               end
-               if restart_index_fo == 1
-                   pop_fo_struct = restart_pop(pop_fo_struct,func);
-                   nfes = nfes + pop_fo_struct.popsize;
-               end
-           end
+%            if nfes >= max_nfes * 0.8
+%                [restart_index_fr, restart_index_fo] = stop_trigger(bsf_unchange_counter,pop_fr_struct,pop_fo_struct);
+%                if restart_index_fr == 1
+%                    pop_fr_struct = restart_pop(pop_fr_struct,func);
+%                    nfes = nfes + pop_fr_struct.popsize;
+%                end
+%                if restart_index_fo == 1
+%                    pop_fo_struct = restart_pop(pop_fo_struct,func);
+%                    nfes = nfes + pop_fo_struct.popsize;
+%                end
+%            end
            
            %% update sigma record
            sigma_record_fr = [sigma_record_fr; pop_fr_struct.sigma];
