@@ -1,23 +1,23 @@
 function [f, cr] = gnFCR(pop_struct,memory_size,memory_sf,memory_scr,weights)
-%GENFCR the size of population is lambda, and gnFCR will generate lambda * 1 vectors of f and crossover rate
+%GENFCR 
     %  input: 
         % pop_struct        -- information of sub populations
         % memory_size       -- memory size of successful F and CR record
         % memory_sf         -- memory of scale factor f
         % memory_cr         -- memory of scale factor f cr
     %  output:
-        % F            -- the vector of scale factor   (vector of lambda * 1)
-        % CR           -- the vector of crossover rate (vector of lambda * 1)
+        % F            -- the vector of scale factor   (vector of offpopsize * 1)
+        % CR           -- the vector of crossover rate (vector of offpopsize * 1)
 
 % Version 1.4 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18 
 
 %%
-     lambda = pop_struct.lambda; 
-%      mem_rand_index = ceil(memory_size * rand(lambda, 1));
-     temp_rand = rand(lambda,1);
+%      mem_rand_index = ceil(memory_size * rand(offpopsize, 1));
+     offpopsize = pop_struct.lambda;
+     temp_rand = rand(offpopsize,1);
      % simple roulette-wheel selection of mean values of distributions 
-     mem_rand_index = zeros(lambda,1);
-     for i = 1 : lambda
+     mem_rand_index = zeros(offpopsize,1);
+     for i = 1 : offpopsize
          for j = 1 : memory_size
              if temp_rand(i) < weights(j)
                  mem_rand_index(i) = j;
@@ -37,7 +37,7 @@ function [f, cr] = gnFCR(pop_struct,memory_size,memory_sf,memory_scr,weights)
      cr = max(cr, 0);
       
      %% for generating scaling factor
-     f = mu_f + 0.1 * tan(pi * (rand(lambda, 1) - 0.5));
+     f = mu_f + 0.1 * tan(pi * (rand(offpopsize, 1) - 0.5));
      pos = find(f <= 0);
 
      while ~isempty(pos)

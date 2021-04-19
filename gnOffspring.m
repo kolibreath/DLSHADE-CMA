@@ -1,4 +1,4 @@
-function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
+function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr,pattern)
 %GNOFFSPRING generate offspring by DE/current-to-pbetter*/
 % input:
     % pop_struct                   -- struct of population
@@ -6,54 +6,85 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr)
     % archive                      -- archvie stores defeated parents
     % f                            -- generated scale factor f
     % cr                           -- generated crossover rate cr
+    % pattern                      -- pattern == 1: Global Search Stage; pattern == 2: Local Search Stage
 % output:
     % ui                           -- individual after mutation and crossover
     % r0                           -- base vector index
 
-% Version 1.2 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
+% Version 1.9 Author: Shi Zeyuan 734780178@qq.com Date: 2021/4/19
 
-    %% DE/current-to-pbest* mutation and crossover
     pop = pop_struct.pop;
     popsize = pop_struct.popsize;
     problem_size = pop_struct.problem_size;
-    
-    % pop will be sorted according to feasibilty proportion 
-    violated_num = length(find(pop(end) >= 0));
-    pfs = violated_num / popsize;     % proportion of violated numbers
-    
-    [~, columns] = size(pop);  % columns = N + 2 (fitness and conV)
-    % TODO 在搜索前期，pfs比较小，需要多选择conv进行排序， 在搜索后期，根据fitness排序
-    % TODO 可以采取不同的mutation 策略
-
-    %% mutation
-    % select lambda parent as base vector 
-    lambda = pop_struct.lambda;
-    r0 = ceil(rand(1,lambda) * popsize);
-    popAll = [pop; archive.pop];
-    [r1, r2] = gnR1R2(popsize, size(popAll, 1), r0);
-
-    pop = pop(:,1:problem_size);
-    pbetter = zeros(lambda,problem_size);
-    %TODO 设置这里pbest 概率 为 0.3
+    pop = pop(:, 1:problem_size);
+    popAll = [pop; archive.pop(:,1:problem_size)];
     pbest_rate = 0.3;
-    for k = 1: lambda
-        % 可能有部分来自best
-        if rand < 0.7
-            pbetter(k,:) = (pop_struct.xmean' + pop_struct.sigma ...
-              * pop_struct.B * (pop_struct.D .* randn(problem_size, 1)))';
-        else
-            temp = ceil(pbest_rate * popsize);
-            pbetter(k,:) = pop(randi(temp),:);
-        end
+    lambda = pop_struct.lambda;
+    
+    violated_num = length(find(pop(end) >= 0));
+    pfs = violated_num / popsize; % proportion of violated numbers
+
+    [~, columns] = size(pop);
+    % TODO 检查排序
+    if rand >= pfs
+        [pop,~] = sortrows(pop, columns-1);
+    else
+        [pop,~] = sortrows(pop, columns);
     end
-    
-    popAll = popAll(:,1:problem_size);
-    
-    base_vectors = pop(r0,:);
-    f_w = gnFw(nfes,max_nfes,f);
-    vi = base_vectors + f_w(: , ones(1, problem_size)) .* (pbetter - base_vectors)...
-       + f(: , ones(1, problem_size)).* (pop(r1, :) - popAll(r2, :));
-    vi = boundConstraint(vi,pop,r0,lu);
+
+    % size of offspring population
+    % pattern == 1, lambda = popsize
+    % pattern == 2, lambda = popsize * 2
+    %% mutation
+    if pattern == 1
+        %% DE mutation strategy without Covariance Matrix Adaptation
+        % DE/rand/1
+        if rand < 0.7
+            r0 = ceil(rand(1,popsize) * popsize);
+            [r1, r2] = gnR1R2(popsize,size(popAll,1),r0); 
+            base_vectors = pop(r0,:);
+            vi = base_vectors + f(:, ones(1, problem_size)) .* (pop(r1, :) - popAll(r2, :));
+            vi = boundConstraint(vi, pop, r0, lu);
+        else
+            % DE/best/1
+            temp = ceil(popsize * pbest_rate);
+            r0 = ceil(rand(1,popsize) * temp);
+            [r1, r2] = gnR1R2(popsize, size(popAll, 1), r0);
+            base_vectors = pop(r0,:);
+            vi = base_vectors + f(:, ones(1,problem_size)) .* (pop(r1, :) - popAll(r2, :));
+            vi = boundConstraint(vi, pop, r0, lu);
+        end
+    else  % pattern == 2
+        %% DE mutation strategy with Covariance Matrix Adaptation 
+        % pop will be sorted according to feasibilty proportion
+
+        % select lambda parent as base vector
+        lambda = pop_struct.lambda;
+        r0 = ceil(rand(1, lambda) * popsize);
+        [r1, r2] = gnR1R2(popsize, size(popAll, 1), r0);
+        pbetter = zeros(lambda, problem_size);
+        %TODO 设置这里pbest 概率 为 0.3
+       
+
+        for k = 1:lambda
+            % 可能有部分来自best
+            if rand < 0.7
+                pbetter(k, :) = (pop_struct.xmean' + pop_struct.sigma ...
+                    * pop_struct.B * (pop_struct.D .* randn(problem_size, 1)))';
+            else
+                temp = ceil(pbest_rate * popsize);
+                pbetter(k, :) = pop(randi(temp), :);
+            end
+
+        end
+
+        base_vectors = pop(r0, :);
+        f_w = gnFw(nfes, max_nfes, f);
+        vi = base_vectors + f_w(:, ones(1, problem_size)) .* (pbetter - base_vectors) ...
+            + f(:, ones(1, problem_size)) .* (pop(r1, :) - popAll(r2, :));
+        vi = boundConstraint(vi, pop, r0, lu);
+    end
+  
     % crossover
     mask = rand(lambda, problem_size) > cr(:, ones(1, problem_size)); % mask is used to indicate which elements of ui comes from the parent
     rows = (1:lambda)'; 
