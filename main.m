@@ -26,10 +26,6 @@ for func = 5:5
     optimum = func * 100.0;
     %% PARAMETER SETTINGS FOR PROBLEM SIZE
     Dimension_size = [10, 30, 50, 100];
-    
-    %% Record the best results
-
-
     fprintf('\n-------------------------------------------------------\n')
 
     %% for each problem size
@@ -39,10 +35,11 @@ for func = 5:5
       initial_flag = 0;
       fprintf('Function = %d, Dimension size = %d\n', func, problem_size)
 
-      
       %% for each run:
-      for run_id = 1:1
+      for run_id = 2:2
+        
         outcome = [];
+        
         bsf_solution = zeros(problem_size + 4, 1);
         bsf_solution(end-1) = inf;
         bsf_solution(end)   = inf;
@@ -71,7 +68,7 @@ for func = 5:5
         C = B * diag(D.^2) * B';
         invsqrtC = B * diag(D.^ - 1) * B'; % C^-1/2
         eigeneval = 0; % track update of B and D
-        xmean = rand(1,problem_size);
+        xmean = rand(1,problem_size) .* (lu(2)-lu(1));
         sigma = 0.3;
         
         %% PARAMETER SETTINGS FOR COVARIANCE ADAPTATION MATIRX (CMA)
@@ -150,6 +147,7 @@ for func = 5:5
         bsf_unchange_counter = 0;
         sigma_record_fr = [];
         sigma_record_fo = [];
+        counter = 0;
         while nfes < max_nfes
             memory_w_fr = memory_weights(sigma_record_fr, sigma_gen, memory_size, memory_sf);
             memory_w_fo = memory_weights(sigma_record_fo, sigma_gen, memory_size, memory_sf);
@@ -210,18 +208,43 @@ for func = 5:5
             
            %% update best so far solution
            bsf_solution = find_bsf(pop_fr_struct,pop_fo_struct,bsf_solution);
-          
+           
+           %% update stop_trigger      
+           temp = floor(gen / bsf_gen_len);
+           % update last_bsf_solution after every bsf_len generation
+           if temp > bsf_index
+               last_bsf_solution = bsf_solution;
+               if all(last_bsf_solution == bsf_solution)
+                   bsf_unchange_counter = bsf_unchange_counter + 1;
+               end
+               bsf_index = temp;
+           end
+           % restart only happens at the late stage of the search
+           if nfes >= max_nfes * 0.8
+                [restart_index_fr, restart_index_fo] = stop_trigger(bsf_unchange_counter,pop_fr_struct,pop_fo_struct);
+                if restart_index_fr == 1
+                    [pop_fr_struct] = restart_pop(pop_fr_struct,func);
+                    nfes = nfes + pop_fr_struct.popsize;
+                end
+                if restart_index_fo == 1
+                    [pop_fo_struct] = restart_pop(pop_fo_struct,func);
+                    nfes = nfes + pop_fo_struct.popsize;
+                end
+            end
            
            %% update sigma record
            sigma_record_fr = [sigma_record_fr; pop_fr_struct.sigma];
            sigma_record_fo = [sigma_record_fo; pop_fo_struct.sigma];
            
+           outcome = [outcome;[gen,bsf_solution(end-1)]];
            gen = gen + 1;
            
            outcome = [outcome; [gen, bsf_solution(end-1)] ];
         end % end of while
         fprintf('run= %d, fitness = %d\n, conv = %d\n' ,run_id,bsf_solution(end-1),bsf_solution(end));
+        pplot(outcome);
        end %% end 1 run
+       
        fprintf("---------------------------------------------------\n");
        fprintf('fitness = %d\n, conv = %d\n' ,bsf_solution(end-1),bsf_solution(end));
        plot(outcome);
