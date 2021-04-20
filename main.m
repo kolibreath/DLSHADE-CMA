@@ -21,7 +21,7 @@ global initial_flag ; % for CEC2017 test function evaluation
 
 rand('seed', sum(100 * clock));
 
-for func = 5:5
+for func = 1:28
 
     optimum = func * 100.0;
     %% PARAMETER SETTINGS FOR PROBLEM SIZE
@@ -47,7 +47,7 @@ for func = 5:5
         last_bsf_solution = bsf_solution;
         
         lu = decision_range(func, problem_size)';  % 2 * problem_size matrix
-        max_nfes = 10000* problem_size;
+        max_nfes = 20000* problem_size;
         nfes = 0;
         
         %% PARAMETER SETTINGS FOR FROFI
