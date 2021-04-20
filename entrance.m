@@ -23,7 +23,7 @@ for func = 1:1
     fprintf('\n-------------------------------------------------------\n')
 
     %% for each problem size
-    for dim_num = 1:1
+    for dim_num = 2:2
         problem_size = Dimension_size(dim_num);
         initial_flag = 0;
         fprintf('Function = %d, Dimension size = %d\n', func, problem_size)
@@ -37,7 +37,7 @@ for func = 1:1
         for run_id = 1:1
 
             lu = decision_range(func, problem_size)'; % 2 * problem_size matrix
-            max_nfes = 10000 * problem_size ;
+            max_nfes = 20000 * problem_size;
             nfes = 0;
 
             %% INITIALIZE GLOBAL POPULATION
@@ -103,7 +103,7 @@ for func = 1:1
             cma = assem_cma(problem_size, lambda);
             sigma_lu = [1e-20, min((lu(2) - lu(1)) / 2)];
             %% kmeans
-            cluster_number = 8;
+            cluster_number = 2;
             idx = kmeans(global_pop_struct.pop(:,1:problem_size), cluster_number);
             [pop_array, nfes] = repair_population(idx, cluster_number, global_pop_struct.pop, ... 
                                 problem_size, nfes, func);
@@ -112,7 +112,7 @@ for func = 1:1
             while nfes < max_nfes
                 % 每个子种群自行迭代 更新shade中的memory archive等等
                 for i = 1 : cluster_number
-                    pop_struct = pop_array(i);
+                    pop_struct = pop_array{i};
                     [f, cr] = gnFCR(pop_struct, memory_size, memory_sf, memory_scr);
                     [ui, base] = gnOffspring(pop_struct, lu, archive, nfes, max_nfes, f, cr,2);
                     ui = evalpop(ui, func);

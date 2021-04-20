@@ -14,7 +14,7 @@ function [pop_array,nfes] = repair_population(idx,cluster_size,pop,problem_size,
     eigeneval = 0; % track update of B and D
     sigma = 0.3;
 
-    pop_array = [];
+    pop_array = cell(1,cluster_size);
     for i = 1 : cluster_size
         %% 直接对每一个聚类中的所有个体进行协方差矩阵的估计和计算会出现问题：
         % 因为这些个体可以求出协方差矩阵，但是这些个体的特征向量会出现问题
@@ -34,6 +34,6 @@ function [pop_array,nfes] = repair_population(idx,cluster_size,pop,problem_size,
         nfes = nfes + popsize;
         pop_struct = assem_pop(pop_cluster, popsize, lambda, problem_size, C, D, B, ...
                      invsqrtC, eigeneval, xmean, sigma);
-        pop_array = [pop_array;pop_struct];
+        pop_array{i} = pop_struct;
     end
 end
