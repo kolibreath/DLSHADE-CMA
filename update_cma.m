@@ -19,7 +19,7 @@ function [pop_struct,cma]= update_cma(pop_struct,nfes, sigma_lu)
     % TODO 如果最后确定不存在任何的resize popsize的操作可以将这个代码删除
     cma = assem_cma(problem_size,lambda);
 
-    pop_struct.xmean =  (cma.weights)* pop; 
+    pop_struct.xmean =  (cma.weights)* pop;  
     % update evolution paths
     mu = popsize;
    

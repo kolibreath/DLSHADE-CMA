@@ -37,7 +37,7 @@ for func = 1:1
         for run_id = 1:1
 
             lu = decision_range(func, problem_size)'; % 2 * problem_size matrix
-            max_nfes = 10000 * problem_size;
+            max_nfes = 10000 * problem_size ;
             nfes = 0;
 
             %% INITIALIZE GLOBAL POPULATION
@@ -98,25 +98,15 @@ for func = 1:1
             
             %% ------------------------------ Local Search Stage --------------------------------
             %% INITIALIZATION FOR CMA
-            
-            lambda = 4 + floor(3 * log(problem_size));
-            popsize = floor(lambda / 2);
-            B = eye(problem_size, problem_size);
-            D = ones(problem_size, 1);
-            C = B * diag(D.^2) * B';
-            invsqrtC = B * diag(D.^ - 1) * B'; % C^-1/2
-            eigeneval = 0; % track update of B and D
-            xmean = rand(1, problem_size) .* (lu(2) - lu(1));
-            sigma = 0.3;
-
             %% PARAMETER SETTINGS FOR COVARIANCE ADAPTATION MATIRX (CMA)
+            lambda = 4 + floor(3 * log(problem_size));
             cma = assem_cma(problem_size, lambda);
             sigma_lu = [1e-20, min((lu(2) - lu(1)) / 2)];
             %% kmeans
             cluster_number = 8;
             idx = kmeans(global_pop_struct.pop(:,1:problem_size), cluster_number);
             [pop_array, nfes] = repair_population(idx, cluster_number, global_pop_struct.pop, ... 
-                                global_pop_struct.problem_size, cma.mu, lambda, nfes, func);
+                                problem_size, nfes, func);
             % 先完成一个没有子种群交换的版本
             % TODO 一定要修改evalpop 修改成会自动改变nfes的版本... 太傻比了
             while nfes < max_nfes

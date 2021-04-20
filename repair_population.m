@@ -1,48 +1,38 @@
-function [pop_array,nfes] = repair_population(idx,cluster_size,pop,problem_size,mu,lambda,nfes,func)
+function [pop_array,nfes] = repair_population(idx,cluster_size,pop,problem_size,nfes,func)
 % input:
     % idx                       -- indices of clusters
     % pop                       -- global population 
 % output:
     % pop_array                 -- array of repaired pop_structs 
 
+    lambda = 4 + floor(3 * log(problem_size));
+    popsize = floor(lambda / 2);
+    B = eye(problem_size, problem_size);
+    D = ones(problem_size, 1);
+    C = B * diag(D.^2) * B';
+    invsqrtC = B * diag(D.^ - 1) * B'; % C^-1/2
+    eigeneval = 0; % track update of B and D
+    sigma = 0.3;
+
     pop_array = [];
     for i = 1 : cluster_size
+        %% 直接对每一个聚类中的所有个体进行协方差矩阵的估计和计算会出现问题：
+        % 因为这些个体可以求出协方差矩阵，但是这些个体的特征向量会出现问题
+        %% TODO 想出更好的思路进行局部搜索
+        %% 目前通过对当前的xmean 作为均值中心进行搜索
         pop_cluster = pop(find(idx == i),:);
-        [popsize,columns] = size(pop_cluster);
-        if popsize < mu     % add some individual to pop_cluster
-            % 估计当前popsize 的个体的协方差矩阵，通过协方差矩阵和均值中心再生n个个体
-            n = mu - popsize;
-            C = cov(pop_cluster(:,1:problem_size));
-            sigma = 0.3;
-            [B,D] = eig(C);
-            B = B';
-            xmean = mean(pop_cluster(:,1:problem_size));
-            % 生成新的n个个体
-            ui = zeros(n,problem_size);
-            for k = 1 <= n
-                ui(k, :) = (xmean' + sigma * B * (D * randn(problem_size, 1)))';
-            end
-            ui = evalpop(ui,func);
-            nfes = nfes + n;
-            pop_cluster = [pop_cluster;ui];
-        elseif popsize > mu % remove some individuals from pop_cluster
-            % sort based on fitness
-            [~,sorted_index] =  sortrows(pop_cluster,columns-1);
-            pop_cluster(sorted_index(mu+1:end),:) = [];  
-        end
-
-        % 完成修复这个聚类之后 计算协方差矩阵
-        C = cov(pop_cluster(:,1:problem_size));
-        C = triu(C) + triu(C, 1)';
-        [B, D] = eig(C);
-        B = B'; 
-        % 
-        D = sqrt(diag(D));
-        invsqrtC = B * diag(D.^ - 1) * B';
-        sigma = 0.3;
-        eigeneval = nfes; %% TODO 这里要检查eigeneval 什么时候会触发
         xmean = mean(pop_cluster(:,1:problem_size));
-        pop_struct = assem_pop(pop_cluster, mu, lambda, problem_size, C, D, B, ...
+        
+        %% 重新初始化pop_cluster
+        pop_cluster = zeros(popsize,problem_size);
+        k = 1;
+        while k <= popsize
+            pop_cluster(k,:) =  (xmean' + sigma * B * (D .* randn(problem_size, 1)))';
+            k = k + 1;
+        end
+        pop_cluster = evalpop(pop_cluster,func);
+        nfes = nfes + popsize;
+        pop_struct = assem_pop(pop_cluster, popsize, lambda, problem_size, C, D, B, ...
                      invsqrtC, eigeneval, xmean, sigma);
         pop_array = [pop_array;pop_struct];
     end
