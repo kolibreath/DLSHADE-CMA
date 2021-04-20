@@ -16,9 +16,7 @@ function [pop_struct,cma]= update_cma(pop_struct,nfes, sigma_lu)
     xold = pop_struct.xmean;
     popsize = pop_struct.popsize; % mu
     lambda = pop_struct.lambda;
-    % in the LSHADE framework, the LPSR strategy is implemented, so the
-    % popsize(mu) and parameters in CMA related to it will be updated as well
-    % the fastest way is to reinitialized the cma struct with 'new' mu
+    % TODO 如果最后确定不存在任何的resize popsize的操作可以将这个代码删除
     cma = assem_cma(problem_size,lambda);
 
     pop_struct.xmean =  (cma.weights)* pop; 
@@ -50,19 +48,18 @@ function [pop_struct,cma]= update_cma(pop_struct,nfes, sigma_lu)
     if sigma >= sigma_lu(1) && sigma <= sigma_lu(2)
        pop_struct.sigma = sigma;
     end
-    
+
+    pop_struct.eigeneval = nfes;
+    pop_struct.C = triu(pop_struct.C) + triu(pop_struct.C, 1)';
+    [pop_struct.B, pop_struct.D] = eig(pop_struct.C);
+    pop_struct.B = pop_struct.B';
+    pop_struct.D = sqrt(diag(pop_struct.D));
+    pop_struct.invsqrtC = pop_struct.B * diag(pop_struct.D.^-1) * pop_struct.B';
     
     %TODO check here how to achieve O(N^2)
-    if nfes - pop_struct.eigeneval > lambda / (cma.c1 + cma.cmu) / pop_struct.problem_size / 10
-        pop_struct.eigeneval  = nfes;
-        pop_struct.C = triu(pop_struct.C) + triu(pop_struct.C, 1)';
-        [pop_struct.B,pop_struct.D] = eig(pop_struct.C);
-        pop_struct.B = pop_struct.B';
-        pop_struct.D = sqrt(diag(pop_struct.D));
-        pop_struct.invsqrtC = pop_struct.B * diag(pop_struct.D .^ -1) * pop_struct.B';
-    end   
-    
-    
+    % if nfes - pop_struct.eigeneval > lambda / (cma.c1 + cma.cmu) / pop_struct.problem_size / 10
+        
+    % end          
     
 end
 

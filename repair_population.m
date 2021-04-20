@@ -1,13 +1,13 @@
-function [pop_array,nfes] = repair(idx,cluster_size,pop,problem_size,mu,lambda,nfes,func)
+function [pop_array,nfes] = repair_population(idx,cluster_size,pop,problem_size,mu,lambda,nfes,func)
 % input:
     % idx                       -- indices of clusters
     % pop                       -- global population 
 % output:
     % pop_array                 -- array of repaired pop_structs 
 
-    pop_array = zeros(1,cluster_size);
+    pop_array = [];
     for i = 1 : cluster_size
-        pop_cluster = pop(find(idx == i)));
+        pop_cluster = pop(find(idx == i),:);
         [popsize,columns] = size(pop_cluster);
         if popsize < mu     % add some individual to pop_cluster
             % 估计当前popsize 的个体的协方差矩阵，通过协方差矩阵和均值中心再生n个个体
@@ -19,8 +19,8 @@ function [pop_array,nfes] = repair(idx,cluster_size,pop,problem_size,mu,lambda,n
             xmean = mean(pop_cluster(:,1:problem_size));
             % 生成新的n个个体
             ui = zeros(n,problem_size);
-            for i = 1 <= n
-                ui(i, :) = (xmean' + sigma * B * (D .* randn(problem_size, 1)))';
+            for k = 1 <= n
+                ui(k, :) = (xmean' + sigma * B * (D * randn(problem_size, 1)))';
             end
             ui = evalpop(ui,func);
             nfes = nfes + n;
@@ -33,13 +33,17 @@ function [pop_array,nfes] = repair(idx,cluster_size,pop,problem_size,mu,lambda,n
 
         % 完成修复这个聚类之后 计算协方差矩阵
         C = cov(pop_cluster(:,1:problem_size));
+        C = triu(C) + triu(C, 1)';
         [B, D] = eig(C);
-        B = B'; invsqrtC = B * diag(D.^ - 1) * B'
+        B = B'; 
+        % 
+        D = sqrt(diag(D));
+        invsqrtC = B * diag(D.^ - 1) * B';
         sigma = 0.3;
         eigeneval = nfes; %% TODO 这里要检查eigeneval 什么时候会触发
         xmean = mean(pop_cluster(:,1:problem_size));
         pop_struct = assem_pop(pop_cluster, mu, lambda, problem_size, C, D, B, ...
                      invsqrtC, eigeneval, xmean, sigma);
-        pop_array(i) = pop_struct;
+        pop_array = [pop_array;pop_struct];
     end
 end

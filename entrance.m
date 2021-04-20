@@ -23,40 +23,36 @@ for func = 1:1
     fprintf('\n-------------------------------------------------------\n')
 
     %% for each problem size
-    for dim_num = 2:2
-
+    for dim_num = 1:1
         problem_size = Dimension_size(dim_num);
         initial_flag = 0;
         fprintf('Function = %d, Dimension size = %d\n', func, problem_size)
 
         %% for each run:
-        for run_id = 2:2
+        
+        bsf_solution = zeros(problem_size + 4, 1);
+        bsf_solution(end - 1) = inf;
+        bsf_solution(end) = inf;
 
-            outcome = [];
-
-            bsf_solution = zeros(problem_size + 4, 1);
-            bsf_solution(end - 1) = inf;
-            bsf_solution(end) = inf;
-
-            last_bsf_solution = bsf_solution;
+        for run_id = 1:1
 
             lu = decision_range(func, problem_size)'; % 2 * problem_size matrix
             max_nfes = 10000 * problem_size;
             nfes = 0;
 
-            %% initialize population
+            %% INITIALIZE GLOBAL POPULATION
             global_popsize = problem_size * 5; 
-            global_pop = repmat(lu(1, :), global_popsize, 1) +  ...
-            rand(global_popsize, problem_size) .* (repmat(lu(2, :) - lu(1, :), global_popsize, 1));
+            global_pop = repmat(lu(1, :), global_popsize, 1) + rand(global_popsize, ...
+                problem_size) .* (repmat(lu(2, :) - lu(1, :), global_popsize, 1));
             global_pop = evalpop(global_pop,func);
-            
+                    
             global_pop_struct = []; 
             global_pop_struct.popsize = global_popsize; 
             global_pop_struct.problem_size = problem_size;
             global_pop_struct.pop = global_pop;
             global_pop_struct.lambda = global_popsize;
             
-              %% PARAMETER SETTINGS FOR SHADE
+            %% PARAMETER SETTINGS FOR SHADE
             p_best_rate = 0.11;
             arc_rate = 1.4; % archive for saving defeated parents
             memory_size = 5; % memory for successful F and CR
@@ -70,7 +66,6 @@ for func = 1:1
             archive.funvalues = zeros(0, 1); % the function value of the archived solutions
 
             % pos_entropy = []; % record for positional entropy
-            % 使用位置熵的概念先看看各个函数的性质 然后定量设置一个值
             %%  ----------------------------- Global Search Stage --------------------------------
             while nfes < floor(max_nfes * 0.75)
                 %% generate f and cr for subpopulations respectively
@@ -103,6 +98,7 @@ for func = 1:1
             
             %% ------------------------------ Local Search Stage --------------------------------
             %% INITIALIZATION FOR CMA
+            
             lambda = 4 + floor(3 * log(problem_size));
             popsize = floor(lambda / 2);
             B = eye(problem_size, problem_size);
@@ -119,8 +115,8 @@ for func = 1:1
             %% kmeans
             cluster_number = 8;
             idx = kmeans(global_pop_struct.pop(:,1:problem_size), cluster_number);
-            [pop_array, nfes] = repair(idx, cluster_number, global_pop_struct.pop, ... 
-                                global_pop_struct.problem_size, mu, lambda, nfes, func);
+            [pop_array, nfes] = repair_population(idx, cluster_number, global_pop_struct.pop, ... 
+                                global_pop_struct.problem_size, cma.mu, lambda, nfes, func);
             % 先完成一个没有子种群交换的版本
             % TODO 一定要修改evalpop 修改成会自动改变nfes的版本... 太傻比了
             while nfes < max_nfes
@@ -132,7 +128,7 @@ for func = 1:1
                     ui = evalpop(ui, func);
                     nfes = nfes + pop_struct.lambda;
 
-                    [pop_struct, archive, archive, suc_f, suc_cr, delta_k] = ...
+                    [pop_struct, ~, archive, suc_f, suc_cr, delta_k] = ...
                      update_pop_fr(pop_struct, ui, base, archive, f, cr);
 
                     [memory_sf, memory_scr, memory_pos] = update_memory(suc_f, suc_cr, memory_sf, ... 
@@ -152,13 +148,12 @@ for func = 1:1
                     bsf_solution = find_bsf(pop_struct, bsf_solution);
                 end 
             end
-            % fprintf('run= %d, fitness = %d\n, conv = %d\n', run_id, bsf_solution(end - 1), bsf_solution(end));
-           
+             fprintf('run= %d, fitness = %d\n, conv = %d\n', run_id, bsf_solution(end - 1), bsf_solution(end));
+             fprintf("---------------------------------------------------\n");
         end %% end 1 run
 
         fprintf("---------------------------------------------------\n");
         fprintf('fitness = %d\n, conv = %d\n', bsf_solution(end - 1), bsf_solution(end));
-        plot(outcome);
 
     end %% end of iterate one problem size
 

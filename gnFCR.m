@@ -1,4 +1,4 @@
-function [f, cr] = gnFCR(popsize, memory_size, memory_sf, memory_scr)
+function [f, cr] = gnFCR(pop_struct, memory_size, memory_sf, memory_scr)
     %GENFCR the size of population is lambda, and gnFCR will generate lambda * 1 vectors of f and crossover rate
     %  input:
     % popsize           -- the size of population
@@ -12,7 +12,7 @@ function [f, cr] = gnFCR(popsize, memory_size, memory_sf, memory_scr)
     % Version 1.4 Author: Shi Zeyuan 734780178@qq.com Date: 2021/3/18
 
     %%
-    lambda = popsize * 2;
+    lambda = pop_struct.lambda;
     mem_rand_index = ceil(memory_size * rand(lambda, 1));
     % generate mu_f and mu_cr for Cauchy and Gaussian distribution
     mu_f = memory_sf(mem_rand_index);
