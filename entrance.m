@@ -15,7 +15,7 @@ global initial_flag; % for CEC2017 test function evaluation
 
 rand('seed', sum(100 * clock));
 
-for func = 1:1
+for func = 1:2
 
     optimum = func * 100.0;
     %% PARAMETER SETTINGS FOR PROBLEM SIZE
@@ -23,7 +23,7 @@ for func = 1:1
     fprintf('\n-------------------------------------------------------\n')
 
     %% for each problem size
-    for dim_num = 2:2
+    for dim_num = 1:1
         problem_size = Dimension_size(dim_num);
         initial_flag = 0;
         fprintf('Function = %d, Dimension size = %d\n', func, problem_size)
@@ -97,49 +97,51 @@ for func = 1:1
             end % end of while
             
             %% ------------------------------ Local Search Stage --------------------------------
-            %% INITIALIZATION FOR CMA
-            %% PARAMETER SETTINGS FOR COVARIANCE ADAPTATION MATIRX (CMA)
-            lambda = 4 + floor(3 * log(problem_size));
-            cma = assem_cma(problem_size, lambda);
-            sigma_lu = [1e-20, min((lu(2) - lu(1)) / 2)];
-            %% kmeans
-            cluster_number = 2;
-            idx = kmeans(global_pop_struct.pop(:,1:problem_size), cluster_number);
-            [pop_array, nfes] = repair_population(idx, cluster_number, global_pop_struct.pop, ... 
-                                problem_size, nfes, func);
-            % 先完成一个没有子种群交换的版本
-            % TODO 一定要修改evalpop 修改成会自动改变nfes的版本... 太傻比了
-            while nfes < max_nfes
-                % 每个子种群自行迭代 更新shade中的memory archive等等
-                for i = 1 : cluster_number
-                    pop_struct = pop_array{i};
-                    [f, cr] = gnFCR(pop_struct, memory_size, memory_sf, memory_scr);
-                    [ui, base] = gnOffspring(pop_struct, lu, archive, nfes, max_nfes, f, cr,2);
-                    ui = evalpop(ui, func);
-                    nfes = nfes + pop_struct.lambda;
+            % %% INITIALIZATION FOR CMA
+            % %% PARAMETER SETTINGS FOR COVARIANCE ADAPTATION MATIRX (CMA)
+            % lambda = 4 + floor(3 * log(problem_size));
+            % cma = assem_cma(problem_size, lambda);
+            % sigma_lu = [1e-20, min((lu(2) - lu(1)) / 2)];
+            % %% kmeans
+            % cluster_number = 2;
+            % idx = kmeans(global_pop_struct.pop(:,1:problem_size), cluster_number);
+            % [pop_array, nfes] = repair_population(idx, cluster_number, global_pop_struct.pop, ... 
+            %                     problem_size, nfes, func);
+            % % 先完成一个没有子种群交换的版本
+            % % TODO 一定要修改evalpop 修改成会自动改变nfes的版本... 太傻比了
+            % while nfes < max_nfes
+            %     % 每个子种群自行迭代 更新shade中的memory archive等等
+            %     for i = 1 : cluster_number
+            %         pop_struct = pop_array{i};
+            %         [f, cr] = gnFCR(pop_struct, memory_size, memory_sf, memory_scr);
+            %         [ui, base] = gnOffspring(pop_struct, lu, archive, nfes, max_nfes, f, cr,2);
+            %         ui = evalpop(ui, func);
+            %         nfes = nfes + pop_struct.lambda;
 
-                    [pop_struct, ~, archive, suc_f, suc_cr, delta_k] = ...
-                     update_pop_fr(pop_struct, ui, base, archive, f, cr);
+            %         [pop_struct, ~, archive, suc_f, suc_cr, delta_k] = ...
+            %          update_pop_fr(pop_struct, ui, base, archive, f, cr);
 
-                    [memory_sf, memory_scr, memory_pos] = update_memory(suc_f, suc_cr, memory_sf, ... 
-                    memory_scr, memory_size, memory_pos, delta_k);
+            %         [memory_sf, memory_scr, memory_pos] = update_memory(suc_f, suc_cr, memory_sf, ... 
+            %         memory_scr, memory_size, memory_pos, delta_k);
 
-                    %% resize the population size of pop_fo and pop_fr
-                    archive.NP = round(arc_rate * lambda);
+            %         %% resize the population size of pop_fo and pop_fr
+            %         archive.NP = round(arc_rate * lambda);
 
-                    if size(archive.pop, 1) > archive.NP
-                        rndpos = randperm(size(archive.pop, 1));
-                        rndpos = rndpos(1:archive.NP);
-                        archive.pop = archive.pop(rndpos, :);
-                    end
+            %         if size(archive.pop, 1) > archive.NP
+            %             rndpos = randperm(size(archive.pop, 1));
+            %             rndpos = rndpos(1:archive.NP);
+            %             archive.pop = archive.pop(rndpos, :);
+            %         end
 
-                    % CMA parameters update (populations in pop_fr and pop_fo are sorted)
-                    [pop_struct] = update_cma(pop_struct, nfes, sigma_lu);
-                    bsf_solution = find_bsf(pop_struct, bsf_solution);
-                end 
-            end
-             fprintf('run= %d, fitness = %d\n, conv = %d\n', run_id, bsf_solution(end - 1), bsf_solution(end));
-             fprintf("---------------------------------------------------\n");
+            %         % CMA parameters update (populations in pop_fr and pop_fo are sorted)
+            %         [pop_struct] = update_cma(pop_struct, nfes, sigma_lu);
+            %         bsf_solution = find_bsf(pop_struct, bsf_solution);
+            %     end 
+            % end
+            %  fprintf('run= %d, fitness = %d\n, conv = %d\n', run_id, bsf_solution(end - 1), bsf_solution(end));
+            pfs = numel(find(global_pop_struct.pop(:,end) == 0)) / global_pop_struct.popsize;
+            fprintf('pfs = %d\n', pfs);
+            fprintf("---------------------------------------------------\n");
         end %% end 1 run
 
         fprintf("---------------------------------------------------\n");
