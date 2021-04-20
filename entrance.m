@@ -73,11 +73,8 @@ for func = 1:1
             % 使用位置熵的概念先看看各个函数的性质 然后定量设置一个值
             %%  ----------------------------- Global Search Stage --------------------------------
             while nfes < floor(max_nfes * 0.75)
-                %% 这里的检查一下权重设置有无问题
-%                 memory_weight = ones(memory_size,1) / memory_size;
-                memory_weight = [0.2 0.4 0.6 0.8 1.0];
                 %% generate f and cr for subpopulations respectively
-                [f, cr] = gnFCR(global_pop_struct, memory_size, memory_sf, memory_scr, memory_weight);
+                [f, cr] = gnFCR(global_pop_struct, memory_size, memory_sf, memory_scr);
                 % Note: ui is un-evaluated matrix (lambda * problem_size)
                 [ui, base] = gnOffspring(global_pop_struct, lu, archive, nfes, max_nfes, f, cr,1);
                 
@@ -101,7 +98,7 @@ for func = 1:1
                 end
 
                 %% update best so far solution
-                bsf_solution = find_bsf(global_pop_struct, global_pop_struct, bsf_solution);
+                bsf_solution = find_bsf(global_pop_struct, bsf_solution);
             end % end of while
             
             %% ------------------------------ Local Search Stage --------------------------------
@@ -125,11 +122,34 @@ for func = 1:1
             [pop_array, nfes] = repair(idx, cluster_number, global_pop_struct.pop, ... 
                                 global_pop_struct.problem_size, mu, lambda, nfes, func);
             % 先完成一个没有子种群交换的版本
+            % TODO 一定要修改evalpop 修改成会自动改变nfes的版本... 太傻比了
             while nfes < max_nfes
                 % 每个子种群自行迭代 更新shade中的memory archive等等
                 for i = 1 : cluster_number
-                    pop_sturct = pop_array(i);
-                    
+                    pop_struct = pop_array(i);
+                    [f, cr] = gnFCR(pop_struct, memory_size, memory_sf, memory_scr);
+                    [ui, base] = gnOffspring(pop_struct, lu, archive, nfes, max_nfes, f, cr,2);
+                    ui = evalpop(ui, func);
+                    nfes = nfes + pop_struct.lambda;
+
+                    [pop_struct, archive, archive, suc_f, suc_cr, delta_k] = ...
+                     update_pop_fr(pop_struct, ui, base, archive, f, cr);
+
+                    [memory_sf, memory_scr, memory_pos] = update_memory(suc_f, suc_cr, memory_sf, ... 
+                    memory_scr, memory_size, memory_pos, delta_k);
+
+                    %% resize the population size of pop_fo and pop_fr
+                    archive.NP = round(arc_rate * lambda);
+
+                    if size(archive.pop, 1) > archive.NP
+                        rndpos = randperm(size(archive.pop, 1));
+                        rndpos = rndpos(1:archive.NP);
+                        archive.pop = archive.pop(rndpos, :);
+                    end
+
+                    % CMA parameters update (populations in pop_fr and pop_fo are sorted)
+                    [pop_struct] = update_cma(pop_struct, nfes, sigma_lu);
+                    bsf_solution = find_bsf(pop_struct, bsf_solution);
                 end 
             end
             % fprintf('run= %d, fitness = %d\n, conv = %d\n', run_id, bsf_solution(end - 1), bsf_solution(end));
