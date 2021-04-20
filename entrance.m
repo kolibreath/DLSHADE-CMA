@@ -23,7 +23,7 @@ for func = 1:1
     fprintf('\n-------------------------------------------------------\n')
 
     %% for each problem size
-    for dim_num = 1:1
+    for dim_num = 2:2
 
         problem_size = Dimension_size(dim_num);
         initial_flag = 0;
@@ -45,7 +45,7 @@ for func = 1:1
             nfes = 0;
 
             %% initialize population
-            global_popsize = problem_size * 10; 
+            global_popsize = problem_size * 5; 
             global_pop = repmat(lu(1, :), global_popsize, 1) +  ...
             rand(global_popsize, problem_size) .* (repmat(lu(2, :) - lu(1, :), global_popsize, 1));
             global_pop = evalpop(global_pop,func);
@@ -71,6 +71,7 @@ for func = 1:1
 
             % pos_entropy = []; % record for positional entropy
             % 使用位置熵的概念先看看各个函数的性质 然后定量设置一个值
+            %%  ----------------------------- Global Search Stage --------------------------------
             while nfes < floor(max_nfes * 0.75)
                 %% 这里的检查一下权重设置有无问题
 %                 memory_weight = ones(memory_size,1) / memory_size;
@@ -103,14 +104,27 @@ for func = 1:1
                 bsf_solution = find_bsf(global_pop_struct, global_pop_struct, bsf_solution);
             end % end of while
             
-            % 计算位置熵 通过fitness 和 conv 排序之后的位置之间的差值
-            [~,columns] = size(global_pop_struct.pop);
-            [~, sortedfit_index] = sortrows(global_pop_struct.pop, columns - 1);
-            [~, sortedcon_index] = sortrows(global_pop_struct.pop, columns);
-            pop_entropy = sum(abs(sortedfit_index - sortedcon_index));
+            %% ------------------------------ Local Search Stage --------------------------------
+            %% INITIALIZATION FOR CMA
+            lambda = 4 + floor(3 * log(problem_size));
+            popsize = floor(lambda / 2);
+            B = eye(problem_size, problem_size);
+            D = ones(problem_size, 1);
+            C = B * diag(D.^2) * B';
+            invsqrtC = B * diag(D.^ - 1) * B'; % C^-1/2
+            eigeneval = 0; % track update of B and D
+            xmean = rand(1, problem_size) .* (lu(2) - lu(1));
+            sigma = 0.3;
+
+            %% PARAMETER SETTINGS FOR COVARIANCE ADAPTATION MATIRX (CMA)
+            cma = assem_cma(problem_size, lambda);
+            sigma_lu = [1e-20, min((lu(2) - lu(1)) / 2)];
+            %% kmeans
+            cluster_size = ceil(global_pop_struct.popsize / 8);
+            idx = kmeans(global_pop_struct.pop(:,1:problem_size), cluster_size);
 
             % fprintf('run= %d, fitness = %d\n, conv = %d\n', run_id, bsf_solution(end - 1), bsf_solution(end));
-            fprintf('func= %d, dimension = %d, entropy = %d\n', func, problem_size, pop_entropy);
+           
         end %% end 1 run
 
         fprintf("---------------------------------------------------\n");
