@@ -120,9 +120,18 @@ for func = 1:1
             cma = assem_cma(problem_size, lambda);
             sigma_lu = [1e-20, min((lu(2) - lu(1)) / 2)];
             %% kmeans
-            cluster_size = 8;
-            idx = kmeans(global_pop_struct.pop(:,1:problem_size), cluster_size);
-
+            cluster_number = 8;
+            idx = kmeans(global_pop_struct.pop(:,1:problem_size), cluster_number);
+            [pop_array, nfes] = repair(idx, cluster_number, global_pop_struct.pop, ... 
+                                global_pop_struct.problem_size, mu, lambda, nfes, func);
+            % 先完成一个没有子种群交换的版本
+            while nfes < max_nfes
+                % 每个子种群自行迭代 更新shade中的memory archive等等
+                for i = 1 : cluster_number
+                    pop_sturct = pop_array(i);
+                    
+                end 
+            end
             % fprintf('run= %d, fitness = %d\n, conv = %d\n', run_id, bsf_solution(end - 1), bsf_solution(end));
            
         end %% end 1 run
