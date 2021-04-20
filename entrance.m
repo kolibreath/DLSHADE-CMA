@@ -120,7 +120,7 @@ for func = 1:1
             cma = assem_cma(problem_size, lambda);
             sigma_lu = [1e-20, min((lu(2) - lu(1)) / 2)];
             %% kmeans
-            cluster_size = ceil(global_pop_struct.popsize / 8);
+            cluster_size = 8;
             idx = kmeans(global_pop_struct.pop(:,1:problem_size), cluster_size);
 
             % fprintf('run= %d, fitness = %d\n, conv = %d\n', run_id, bsf_solution(end - 1), bsf_solution(end));
