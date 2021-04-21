@@ -1,4 +1,4 @@
-function [pop_array,nfes] = repair_population(pop,problem_size,nfes,func)
+function [pop_array,nfes,cluster_size] = repair_population(pop,problem_size,nfes,func)
 % input:
     % idx                       -- indices of clusters
     % pop                       -- global population 
@@ -26,10 +26,12 @@ function [pop_array,nfes] = repair_population(pop,problem_size,nfes,func)
         
         pop_cluster = zeros(popsize,problem_size);
         k = 1;
-        while k <= popsize
+        while k < popsize
             pop_cluster(k,:) =  (xmean' + sigma * B * (D .* randn(problem_size, 1)))';
             k = k + 1;
         end
+        pop_cluster(k,:) = xmean;
+        
         pop_cluster = evalpop(pop_cluster,func);
         nfes = nfes + popsize;
         pop_struct = assem_pop(pop_cluster, popsize, lambda, problem_size, C, D, B, ...
@@ -47,17 +49,17 @@ function [cluster_size, centers] = find_cluster_center(pop)
     if fit_index(1) == conv_index(1) 
         cluster_size = 3;
         centers = zeros(3,columns);
-        centers(1) = pop(:, pop(fit_index(1)));
+        centers(1,:) = pop(fit_index(1),:);
         % 找mean_fit mean_fit 如果使用两个向量的中间值会重新计算，没有必要
-        centers(2) = pop(:, pop(fit_index(ceil(popsize / 2))));
-        centers(3) = pop(:, pop(conv_index(ceil(popsize / 2))));
+        centers(2,:) = pop(fit_index(ceil(popsize / 2)),:);
+        centers(3,:) = pop(conv_index(ceil(popsize / 2)),:);
     else 
         cluster_size = 4;
         centers = zeros(4, columns);
-        centers(1) = pop(:, pop(fit_index(1)));
-        centers(2) = pop(:, pop(conv_index(1)));
-        centers(3) = pop(:, pop(fit_index(ceil(popsize / 2))));
-        centers(4) = pop(:, pop(conv_index(ceil(popsize / 2))));
+        centers(1,:) = pop(fit_index(1),:);
+        centers(2,:) = pop(conv_index(1),:);
+        centers(3,:) = pop(fit_index(ceil(popsize / 2)),:);
+        centers(4,:) = pop(conv_index(ceil(popsize / 2)),:);
     end
 
 end

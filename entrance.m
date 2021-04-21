@@ -103,7 +103,7 @@ for func = 1:28
             cma = assem_cma(problem_size, lambda);
             sigma_lu = [1e-20, min((lu(2) - lu(1)) / 2)];
             %% 
-            [pop_array, nfes] = repair_population(global_pop_struct.pop, ... 
+            [pop_array, nfes,cluster_number] = repair_population(global_pop_struct.pop, ... 
                                 problem_size, nfes, func);
             % 先完成一个没有子种群交换的版本
             % TODO 一定要修改evalpop 修改成会自动改变nfes的版本... 太傻比了
