@@ -33,13 +33,13 @@ function [pop_struct,cma]= update_cma(pop_struct,nfes, sigma_lu)
             + hsig * sqrt(cma.cc * (2 - cma.cc) * cma.mueff) * (pop_struct.xmean - xold) / pop_struct.sigma;
    
     % Adapt covariance matrix C
+    
     % mu difference vectors (fitness and conv information should be excluded)
     artmp = (1 / pop_struct.sigma) * (pop - repmat(xold, mu, 1));
     artmp = artmp';
     
     % apply active strategy
-    cma.weights(mu+1:end) = cma.weights(mu+1:end) * (-1);
-    pop_struct.C = (1 - cma.c1 - cma.cmu) * pop_struct.C ... % regard old matrix
+    C = (1 - cma.c1 - cma.cmu) * pop_struct.C ... % regard old matrix
            + cma.c1 * (pop_struct.pc' * pop_struct.pc ... % plus rank one update
            + (1 - hsig) * cma.cc * (2 - cma.cc) * pop_struct.C) ... % minor correction if hsig==0
         + cma.cmu * artmp * diag(cma.weights) * artmp' ; % plus active rank mu update
@@ -49,17 +49,22 @@ function [pop_struct,cma]= update_cma(pop_struct,nfes, sigma_lu)
        pop_struct.sigma = sigma;
     end
 
-    
-    
+   [B,D] = eig(C); 
+   % 修复出现负定的情况 不更新
+   if numel(find(D < 0)) ~= 0
+      disp("");
+      return;
+   end
+   
+   pop_struct.C = C;
+
     %TODO check here how to achieve O(N^2)
     if nfes - pop_struct.eigeneval > lambda / (cma.c1 + cma.cmu) / pop_struct.problem_size / 10
         pop_struct.eigeneval = nfes;
         pop_struct.C = triu(pop_struct.C) + triu(pop_struct.C, 1)';
-        [pop_struct.B, pop_struct.D] = eig(pop_struct.C);
-        if numel(find(pop_struct.D < 0)) ~= 0
-            disp("");
-        end
-        pop_struct.B = pop_struct.B';
+        [B,D] = eig(pop_struct.C);      
+        pop_struct.B = B';
+        pop_struct.D = D;
         pop_struct.D = sqrt(diag(pop_struct.D));
         pop_struct.invsqrtC = pop_struct.B * diag(pop_struct.D.^-1) * pop_struct.B';
     end          

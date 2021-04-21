@@ -15,7 +15,7 @@ global initial_flag; % for CEC2017 test function evaluation
 
 rand('seed', sum(100 * clock));
 
-for func = 1:1
+for func = 1:28
 
     optimum = func * 100.0;
     %% PARAMETER SETTINGS FOR PROBLEM SIZE
@@ -67,7 +67,7 @@ for func = 1:1
 
             % pos_entropy = []; % record for positional entropy
             %%  ----------------------------- Global Search Stage --------------------------------
-            while nfes < floor(max_nfes * 0.75)
+            while nfes < floor(max_nfes * 0.65)
                 %% generate f and cr for subpopulations respectively
                 [f, cr] = gnFCR(global_pop_struct, memory_size, memory_sf, memory_scr);
                 % Note: ui is un-evaluated matrix (lambda * problem_size)
@@ -102,10 +102,8 @@ for func = 1:1
             lambda = 4 + floor(3 * log(problem_size));
             cma = assem_cma(problem_size, lambda);
             sigma_lu = [1e-20, min((lu(2) - lu(1)) / 2)];
-            %% kmeans
-            cluster_number = 1;
-            idx = kmeans(global_pop_struct.pop(:,1:problem_size), cluster_number);
-            [pop_array, nfes] = repair_population(idx, cluster_number, global_pop_struct.pop, ... 
+            %% 
+            [pop_array, nfes] = repair_population(global_pop_struct.pop, ... 
                                 problem_size, nfes, func);
             % 先完成一个没有子种群交换的版本
             % TODO 一定要修改evalpop 修改成会自动改变nfes的版本... 太傻比了
