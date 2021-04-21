@@ -11,8 +11,9 @@ function [pop_array,nfes] = repair_population(idx,cluster_size,pop,problem_size,
     D = ones(problem_size, 1);
     C = B * diag(D.^2) * B';
     invsqrtC = B * diag(D.^ - 1) * B'; % C^-1/2
-    eigeneval = 0; % track update of B and D
+    eigeneval = nfes; % track update of B and D
     sigma = 0.3;
+    [~,columns] = size(pop);
 
     pop_array = cell(1,cluster_size);
     for i = 1 : cluster_size
@@ -21,7 +22,8 @@ function [pop_array,nfes] = repair_population(idx,cluster_size,pop,problem_size,
         %% TODO 想出更好的思路进行局部搜索
         %% 目前通过对当前的xmean 作为均值中心进行搜索
         pop_cluster = pop(find(idx == i),:);
-        xmean = mean(pop_cluster(:,1:problem_size));
+        [~,sorted_fit_index] = sortrows(pop_cluster,columns-1);
+        xmean = pop_cluster(sorted_fit_index(1),1:problem_size);
         
         %% 重新初始化pop_cluster
         pop_cluster = zeros(popsize,problem_size);
