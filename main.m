@@ -21,7 +21,7 @@ global initial_flag ; % for CEC2017 test function evaluation
 
 rand('seed', sum(100 * clock));
 
-for func = 1:28
+for func = 1:1
 
     optimum = func * 100.0;
     %% PARAMETER SETTINGS FOR PROBLEM SIZE
@@ -29,7 +29,7 @@ for func = 1:28
     fprintf('\n-------------------------------------------------------\n')
 
     %% for each problem size
-    for dim_num = 2:2
+    for dim_num = 1:1
         
       problem_size = Dimension_size(dim_num);
       initial_flag = 0;
