@@ -102,9 +102,10 @@ for func = 1:1
             lambda = 4 + floor(3 * log(problem_size));
             cma = assem_cma(problem_size, lambda);
             sigma_lu = [1e-20, min((lu(2) - lu(1)) / 2)];
-            %% 
-            [pop_array, nfes,cluster_number] = repair_population(global_pop_struct.pop, ... 
-                                problem_size, nfes, func,lu);
+            
+            % 需要提高archive的大小吗？
+            [pop_array,archive,nfes,cluster_number] = create_cma_pop(global_pop_struct.pop, ... 
+                                    archive,problem_size, nfes, func,lu);
             % 先完成一个没有子种群交换的版本
             % TODO 一定要修改evalpop 修改成会自动改变nfes的版本... 太傻比了
             while nfes < max_nfes
@@ -132,7 +133,7 @@ for func = 1:1
                     end
 
                     % CMA parameters update (populations in pop_fr and pop_fo are sorted)
-                    [pop_struct] = update_cma(pop_struct, nfes, sigma_lu,func);
+                    [pop_struct,cma,nfes] = update_cma(pop_struct, nfes,lu,sigma_lu,func);
                     bsf_solution = find_bsf(pop_struct, bsf_solution);
                     pop_array{i}  = pop_struct;
                 end 

@@ -6,7 +6,7 @@ function [pop_struct,nfes] = initialize_cma_pop(xmean,sigma,problem_size, nfes, 
     C = B * diag(D.^2) * B';
     invsqrtC = B * diag(D.^ - 1) * B'; % C^-1/2
     eigeneval = nfes; % track update of B and D
-
+    
     pop = zeros(popsize, problem_size);
     k = 1;
 

@@ -1,13 +1,16 @@
-function [pop_array,nfes,cluster_size] = create_cma_pop(pop,problem_size,nfes,func,lu)
+function [pop_array,archive,nfes,cluster_size] = create_cma_pop(pop,archive,problem_size,nfes,func,lu)
 % input:
     % idx                       -- indices of clusters
     % pop                       -- global population 
 % output:
     % pop_array                 -- array of repaired pop_structs 
 
+    [popsize,~] = size(pop);
     idx = min_max_distance(pop,problem_size);
-    [cluster_size,centers] = find_cluster_center(pop(idx,:));
-
+    [cluster_size,centers,center_idx] = find_cluster_center(pop(idx,:));
+    all_index = [1:popsize];
+    all_index(center_idx) = [];
+    archive.pop = [archive.pop;pop(all_index,:)];
     pop_array = cell(1,cluster_size);
     for i = 1 : cluster_size
         %% 直接对每一个聚类中的所有个体进行协方差矩阵的估计和计算会出现问题：
@@ -22,7 +25,7 @@ end
 
 % 基本上是分成四个种群
 % best_fitness best_conv mean_conv mean_fit 如果当best_fitness 和 best_conv 对应的个体是一个就会分成三个钟群
-function [cluster_size, centers] = find_cluster_center(pop)
+function [cluster_size, centers, center_idx] = find_cluster_center(pop)
     [popsize, columns] = size(pop);
     [~,fit_index] = sortrows(pop,columns-1);
     [~,conv_index] = sortrows(pop,columns);
@@ -33,6 +36,11 @@ function [cluster_size, centers] = find_cluster_center(pop)
         % 找mean_fit mean_fit 如果使用两个向量的中间值会重新计算，没有必要
         centers(2,:) = pop(fit_index(ceil(popsize / 2)),:);
         centers(3,:) = pop(conv_index(ceil(popsize / 2)),:);
+        
+        center_idx = zeros(1,3); 
+        center_idx(1) = fit_index(1); 
+        center_idx(2) = fit_index(ceil(popsize / 2));
+        center_idx(3) = conv_index(ceil(popsize / 2));
     else 
         cluster_size = 4;
         centers = zeros(4, columns);
@@ -40,6 +48,12 @@ function [cluster_size, centers] = find_cluster_center(pop)
         centers(2,:) = pop(conv_index(1),:);
         centers(3,:) = pop(fit_index(ceil(popsize / 2)),:);
         centers(4,:) = pop(conv_index(ceil(popsize / 2)),:);
+
+        center_idx = zeros(1,4);
+        center_idx(1) = fit_index(1);
+        center_idx(2) = conv_index(2);
+        center_idx(3) = fit_index(ceil(popsize / 2));
+        center_idx(4) = conv_index(ceil(popsize / 2));
     end
 
 end
@@ -62,7 +76,11 @@ function idx = min_max_distance(pop,problem_size)
         idx(k) = best_index;
         diff = (pop(:,1:problem_size) - repmat(best_individual(1:problem_size),popsize,1)) .^2;
         distance = sum(diff,2);
-        best_index = min(distance);
+        [~,best_index] = min(distance);
+        try
         best_individual = pop(best_index,:);
+        catch E
+            disp("");
+        end
     end
 end

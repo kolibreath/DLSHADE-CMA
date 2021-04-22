@@ -75,7 +75,11 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr,pattern)
                 temp = ceil(pbest_rate * popsize);
                 pbetter(k, :) = pop(randi(temp), :);
             end
+        end
 
+        % 在搜索后期的时候个体增加一点点扰动
+        if nfes >= max_nfes * 0.8
+            pbetter = pbetter + rand(lambda,problem_size) * 1e-5;
         end
 
         base_vectors = pop(r0, :);
