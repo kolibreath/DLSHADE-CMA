@@ -15,7 +15,7 @@ global initial_flag; % for CEC2017 test function evaluation
 
 rand('seed', sum(100 * clock));
 
-for func = 1:28
+for func = 1:1
 
     optimum = func * 100.0;
     %% PARAMETER SETTINGS FOR PROBLEM SIZE
@@ -132,7 +132,7 @@ for func = 1:28
                     end
 
                     % CMA parameters update (populations in pop_fr and pop_fo are sorted)
-                    [pop_struct] = update_cma(pop_struct, nfes, sigma_lu);
+                    [pop_struct] = update_cma(pop_struct, nfes, sigma_lu,func);
                     bsf_solution = find_bsf(pop_struct, bsf_solution);
                     pop_array{i}  = pop_struct;
                 end 

@@ -1,4 +1,4 @@
-function [pop_struct,cma]= update_cma(pop_struct,nfes, sigma_lu)
+function [pop_struct,cma]= update_cma(pop_struct,nfes, sigma_lu,func)
 % UPDATE_CMA update CMA related parameters
 % input:
     % pop_struct    -- population struct and population is sorted by
@@ -50,10 +50,12 @@ function [pop_struct,cma]= update_cma(pop_struct,nfes, sigma_lu)
     end
 
    [B,D] = eig(C); 
-   % 修复出现负定的情况 不更新
+   % 如果出现非正定的情况 重新初始化
    if numel(find(D < 0)) ~= 0
-      disp("");
-      return;
+       [~,best_fit] = sortrows(pop_struct.pop,columns-1);
+        xmean = pop_struct.pop(best_fit,:);% 使用最好的结果作为xmean
+       [pop_struct,nfes] = initialize_cma_pop(xmean,problem_size,nfes,func);       
+    return;
    end
    
    pop_struct.C = C;
