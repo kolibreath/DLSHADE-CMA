@@ -1,11 +1,12 @@
-function [pop_array,nfes,cluster_size] = repair_population(pop,problem_size,nfes,func,lu)
+function [pop_array,nfes,cluster_size] = create_cma_pop(pop,problem_size,nfes,func,lu)
 % input:
     % idx                       -- indices of clusters
     % pop                       -- global population 
 % output:
     % pop_array                 -- array of repaired pop_structs 
 
-    [cluster_size,centers] = find_cluster_center(pop);
+    idx = min_max_distance(pop,problem_size);
+    [cluster_size,centers] = find_cluster_center(pop(idx,:));
 
     pop_array = cell(1,cluster_size);
     for i = 1 : cluster_size
@@ -14,8 +15,6 @@ function [pop_array,nfes,cluster_size] = repair_population(pop,problem_size,nfes
         %% TODO 想出更好的思路进行局部搜索
         %% 目前通过对当前的xmean 作为均值中心进行搜索
          xmean = centers(i,1:problem_size);
-        %% 测试：是否是均值中心选取存在问题
-%         xmean = rand(1,problem_size) .* (lu(2)-lu(1));
         [pop_struct,nfes] = initialize_cma_pop(xmean,0.3,problem_size,nfes,func,lu);
         pop_array{i} = pop_struct;
     end
@@ -43,4 +42,27 @@ function [cluster_size, centers] = find_cluster_center(pop)
         centers(4,:) = pop(conv_index(ceil(popsize / 2)),:);
     end
 
+end
+
+%% 通过最大最小距离确定最多4*lambda 大小的种群
+function idx = min_max_distance(pop,problem_size)
+    % 初始点设定为最优fitness的点
+    [popsize, columns] = size(pop);
+    [~,fit_index] = sortrows(pop,columns-1);
+    best_index = fit_index(1);
+    lambda = 4 + floor(3 * log(problem_size));
+    max_n = 4 * lambda;
+    best_individual = pop(best_index,:);
+
+    idx = zeros(1,max_n);
+    % 遍历所有其他个体找到里自身距离最小的
+    for k = 1 : max_n
+        pop(best_index,:) = []; % 删除当前best
+        [popsize,~] = size(pop);
+        idx(k) = best_index;
+        diff = (pop(:,1:problem_size) - repmat(best_individual(1:problem_size),popsize,1)) .^2;
+        distance = sum(diff,2);
+        best_index = min(distance);
+        best_individual = pop(best_index,:);
+    end
 end
