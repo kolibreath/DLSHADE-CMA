@@ -34,7 +34,7 @@ for func = 1:1
         bsf_solution(end - 1) = inf;
         bsf_solution(end) = inf;
 
-        for run_id = 1:1
+        for run_id = 1:10
 
             lu = decision_range(func, problem_size)'; % 2 * problem_size matrix
             max_nfes = 20000 * problem_size;
@@ -104,7 +104,7 @@ for func = 1:1
             sigma_lu = [1e-20, min((lu(2) - lu(1)) / 2)];
             %% 
             [pop_array, nfes,cluster_number] = repair_population(global_pop_struct.pop, ... 
-                                problem_size, nfes, func);
+                                problem_size, nfes, func,lu);
             % 先完成一个没有子种群交换的版本
             % TODO 一定要修改evalpop 修改成会自动改变nfes的版本... 太傻比了
             while nfes < max_nfes

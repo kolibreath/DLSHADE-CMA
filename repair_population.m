@@ -1,4 +1,4 @@
-function [pop_array,nfes,cluster_size] = repair_population(pop,problem_size,nfes,func)
+function [pop_array,nfes,cluster_size] = repair_population(pop,problem_size,nfes,func,lu)
 % input:
     % idx                       -- indices of clusters
     % pop                       -- global population 
@@ -13,10 +13,10 @@ function [pop_array,nfes,cluster_size] = repair_population(pop,problem_size,nfes
         % 因为这些个体可以求出协方差矩阵，但是这些个体的特征向量会出现问题
         %% TODO 想出更好的思路进行局部搜索
         %% 目前通过对当前的xmean 作为均值中心进行搜索
-%         xmean = centers(i,1:problem_size);
+         xmean = centers(i,1:problem_size);
         %% 测试：是否是均值中心选取存在问题
-        xmean = 
-        [pop_struct,nfes] = initialize_cma_pop(xmean,problem_size,nfes,func);
+%         xmean = rand(1,problem_size) .* (lu(2)-lu(1));
+        [pop_struct,nfes] = initialize_cma_pop(xmean,0.3,problem_size,nfes,func,lu);
         pop_array{i} = pop_struct;
     end
 end
