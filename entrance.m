@@ -25,7 +25,7 @@ global lu;
 
 rand('seed', sum(100 * clock));
 
-for func = 1:1
+for func = 1:28
 
     optimum = func * 100.0;
     %% PARAMETER SETTINGS FOR PROBLEM SIZE
@@ -33,7 +33,7 @@ for func = 1:1
     fprintf('\n-------------------------------------------------------\n')
 
     %% for each problem size
-    for dim_num = 1:1
+    for dim_num = 2:2
         problem_size = Dimension_size(dim_num);
         initial_flag = 0;
         fprintf('Function = %d, Dimension size = %d\n', func, problem_size)
@@ -44,7 +44,7 @@ for func = 1:1
         bsf_solution(end - 1) = inf;
         bsf_solution(end) = inf;
 
-        for run_id = 1:10
+        for run_id = 1:1
 
             lu = decision_range(func, problem_size)'; % 2 * problem_size matrix
             max_nfes = 20000 * problem_size;

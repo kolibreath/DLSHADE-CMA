@@ -5,11 +5,10 @@ function [pop_struct,nfes] = restart_trigger(pop_struct,nfes,func)
    global restart_pos;
 %% 只要是重新初始化 必然初始化为原来的两倍
 %% condition1：如果正定性被破坏 重新初始化
-   [~,D] = eig(pop_struct.C); 
    [popsize,columns] = size(pop_struct.pop);
    problem_size = pop_struct.problem_size;
    % 如果出现非正定的情况 重新初始化种群中的所有 或者是进行某一维度的初始化
-   if numel(find(D < 0)) ~= 0
+   if ~isreal(pop_struct.C) || ~isreal(pop_struct.D) || ~isreal(pop_struct.B)
        if rand < restart_pos
            [~,best_fit] = sortrows(pop_struct.pop,columns-1);
             xmean = pop_struct.pop(best_fit,:);% 使用最好的结果作为xmean

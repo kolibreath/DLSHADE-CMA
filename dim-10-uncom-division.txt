@@ -1,36 +1,36 @@
-cluster_size = 4
+
 -------------------------------------------------------
 Function = 1, Dimension size = 10
-before cma, fitness = 1.548844e-22
+before cma, fitness = 2.381674e-24
 , conv = 0
-after cma, fitness = 5.420524e-24
+after cma, fitness = 1.594103e-27
 , conv = 0
 ---------------------------------------------------
-fitness = 5.420524e-24
+fitness = 1.594103e-27
 , conv = 0
 ---------------------------------------------------
 
 
 -------------------------------------------------------
 Function = 2, Dimension size = 10
-before cma, fitness = 8.406047e-23
+before cma, fitness = 9.217414e-23
 , conv = 0
-after cma, fitness = 1.193608e-23
+after cma, fitness = 1.410501e-25
 , conv = 0
 ---------------------------------------------------
-fitness = 1.193608e-23
+fitness = 1.410501e-25
 , conv = 0
 ---------------------------------------------------
 
 
 -------------------------------------------------------
 Function = 3, Dimension size = 10
-before cma, fitness = 2.127021e+05
+before cma, fitness = 1.463056e+04
 , conv = 0
-after cma, fitness = 2.106886e+05
+after cma, fitness = 1.413751e+04
 , conv = 0
 ---------------------------------------------------
-fitness = 2.106886e+05
+fitness = 1.413751e+04
 , conv = 0
 ---------------------------------------------------
 
@@ -49,36 +49,36 @@ fitness = 1.591924e+01
 
 -------------------------------------------------------
 Function = 5, Dimension size = 10
-before cma, fitness = 5.085818e-18
+before cma, fitness = 4.714396e-18
 , conv = 0
-after cma, fitness = 2.231559e-26
+after cma, fitness = 2.088047e-20
 , conv = 0
 ---------------------------------------------------
-fitness = 2.231559e-26
+fitness = 2.088047e-20
 , conv = 0
 ---------------------------------------------------
 
 
 -------------------------------------------------------
 Function = 6, Dimension size = 10
-before cma, fitness = 7.957554e+02
+before cma, fitness = 8.671308e+02
 , conv = 0
-after cma, fitness = 7.957529e+02
+after cma, fitness = 8.671183e+02
 , conv = 0
 ---------------------------------------------------
-fitness = 7.957529e+02
+fitness = 8.671183e+02
 , conv = 0
 ---------------------------------------------------
 
 
 -------------------------------------------------------
 Function = 7, Dimension size = 10
-before cma, fitness = -2.406661e+01
+before cma, fitness = 4.169015e+01
 , conv = 0
-after cma, fitness = -3.530655e+01
+after cma, fitness = 4.163603e+01
 , conv = 0
 ---------------------------------------------------
-fitness = -3.530655e+01
+fitness = 4.163603e+01
 , conv = 0
 ---------------------------------------------------
 
@@ -87,10 +87,10 @@ fitness = -3.530655e+01
 Function = 8, Dimension size = 10
 before cma, fitness = -1.348400e-03
 , conv = 0
-after cma, fitness = -1.998346e-03
+after cma, fitness = -6.042207e-03
 , conv = 0
 ---------------------------------------------------
-fitness = -1.998346e-03
+fitness = -6.042207e-03
 , conv = 0
 ---------------------------------------------------
 
@@ -111,22 +111,22 @@ fitness = -1.843609e+01
 Function = 10, Dimension size = 10
 before cma, fitness = -5.096472e-04
 , conv = 0
-after cma, fitness = -7.099821e-04
+after cma, fitness = -3.765173e-03
 , conv = 0
 ---------------------------------------------------
-fitness = -7.099821e-04
+fitness = -3.765173e-03
 , conv = 0
 ---------------------------------------------------
 
 
 -------------------------------------------------------
 Function = 11, Dimension size = 10
-before cma, fitness = -1.688184e-01
+before cma, fitness = -1.024695e-01
 , conv = 0
-after cma, fitness = -1.688186e-01
+after cma, fitness = -1.685933e-01
 , conv = 0
 ---------------------------------------------------
-fitness = -1.688186e-01
+fitness = -1.685933e-01
 , conv = 0
 ---------------------------------------------------
 
@@ -145,103 +145,103 @@ fitness = -Inf
 
 -------------------------------------------------------
 Function = 13, Dimension size = 10
-before cma, fitness = 6.781579e-17
+before cma, fitness = 2.484896e-02
 , conv = 0
-after cma, fitness = 1.211005e-18
+after cma, fitness = 2.438577e-02
 , conv = 0
 ---------------------------------------------------
-fitness = 1.211005e-18
+fitness = 2.438577e-02
 , conv = 0
 ---------------------------------------------------
 
 
 -------------------------------------------------------
 Function = 14, Dimension size = 10
-before cma, fitness = 3.097667e+00
+before cma, fitness = 3.333635e+00
 , conv = 0
-after cma, fitness = 3.074566e+00
+after cma, fitness = 3.332069e+00
 , conv = 0
 ---------------------------------------------------
-fitness = 3.074566e+00
+fitness = 3.332069e+00
 , conv = 0
 ---------------------------------------------------
 
 
 -------------------------------------------------------
 Function = 15, Dimension size = 10
-before cma, fitness = 2.434727e+01
-, conv = 0
-after cma, fitness = 2.434727e+01
+before cma, fitness = 1.806339e+01
+, conv = 9.830534e-04
+after cma, fitness = 1.806409e+01
 , conv = 0
 ---------------------------------------------------
-fitness = 2.434727e+01
+fitness = 1.806409e+01
 , conv = 0
 ---------------------------------------------------
 
 
 -------------------------------------------------------
 Function = 16, Dimension size = 10
-before cma, fitness = 6.440251e+01
+before cma, fitness = 7.539808e+01
 , conv = 0
-after cma, fitness = 6.440251e+01
+after cma, fitness = 7.539808e+01
 , conv = 0
 ---------------------------------------------------
-fitness = 6.440251e+01
+fitness = 7.539808e+01
 , conv = 0
 ---------------------------------------------------
 
 
 -------------------------------------------------------
 Function = 17, Dimension size = 10
-before cma, fitness = 9.695736e-01
-, conv = 11
-after cma, fitness = 9.695736e-01
-, conv = 11
+before cma, fitness = 1.010299e+00
+, conv = 1.100483e+01
+after cma, fitness = 1.008468e+00
+, conv = 1.100000e+01
 ---------------------------------------------------
-fitness = 9.695736e-01
-, conv = 11
+fitness = 1.008468e+00
+, conv = 1.100000e+01
 ---------------------------------------------------
 
 
 -------------------------------------------------------
 Function = 18, Dimension size = 10
-before cma, fitness = 6.886500e+03
-, conv = 2.821823e+08
-after cma, fitness = 5212
-, conv = 3.994378e+07
+before cma, fitness = 2.005250e+03
+, conv = 5.880728e+07
+after cma, fitness = 9.755637e+03
+, conv = 2.643285e+05
 ---------------------------------------------------
-fitness = 5212
-, conv = 3.994378e+07
+fitness = 9.755637e+03
+, conv = 2.643285e+05
 ---------------------------------------------------
 
 
 -------------------------------------------------------
 Function = 19, Dimension size = 10
-before cma, fitness = 2.188203e-06
+before cma, fitness = 2.068847e-06
 , conv = 1.326718e+04
-after cma, fitness = 1.793306e-06
+after cma, fitness = 2.068847e-06
 , conv = 1.326718e+04
 ---------------------------------------------------
-fitness = 1.793306e-06
+fitness = 2.068847e-06
 , conv = 1.326718e+04
 ---------------------------------------------------
 
 
 -------------------------------------------------------
 Function = 20, Dimension size = 10
-before cma, fitness = 8.772280e-01
+before cma, fitness = 8.707879e-01
 , conv = 0
-after cma, fitness = -Inf
+after cma, fitness = 8.704676e-01
 , conv = 0
 ---------------------------------------------------
-fitness = -Inf
+fitness = 8.704676e-01
 , conv = 0
 ---------------------------------------------------
 
 
 -------------------------------------------------------
 Function = 21, Dimension size = 10
-before cma, fitness = 3.987903e+00
+before cma, fitness = 3.987902e+00
 , conv = 0
 after cma, fitness = -Inf
 , conv = 0
@@ -253,24 +253,24 @@ fitness = -Inf
 
 -------------------------------------------------------
 Function = 22, Dimension size = 10
-before cma, fitness = 7.924706e-15
+before cma, fitness = 5.517715e-14
 , conv = 0
-after cma, fitness = 3.544957e-19
+after cma, fitness = -1.019716e-07
 , conv = 0
 ---------------------------------------------------
-fitness = 3.544957e-19
+fitness = -1.019716e-07
 , conv = 0
 ---------------------------------------------------
 
 
 -------------------------------------------------------
 Function = 23, Dimension size = 10
-before cma, fitness = 2.914520e+00
+before cma, fitness = 3.086803e+00
 , conv = 0
-after cma, fitness = 2.904700e+00
+after cma, fitness = 3.081009e+00
 , conv = 0
 ---------------------------------------------------
-fitness = 2.904700e+00
+fitness = 3.081009e+00
 , conv = 0
 ---------------------------------------------------
 
@@ -289,49 +289,49 @@ fitness = 1.492249e+01
 
 -------------------------------------------------------
 Function = 25, Dimension size = 10
-before cma, fitness = 7.539808e+01
+before cma, fitness = 6.911490e+01
 , conv = 0
-after cma, fitness = 7.539808e+01
+after cma, fitness = 6.911490e+01
 , conv = 0
 ---------------------------------------------------
-fitness = 7.539808e+01
+fitness = 6.911490e+01
 , conv = 0
 ---------------------------------------------------
 
 
 -------------------------------------------------------
 Function = 26, Dimension size = 10
-before cma, fitness = 1.046460e+00
-, conv = 1.100050e+01
-after cma, fitness = 1.048786e+00
-, conv = 1.099993e+01
+before cma, fitness = 9.711997e-01
+, conv = 11
+after cma, fitness = 9.721101e-01
+, conv = 1.099912e+01
 ---------------------------------------------------
-fitness = 1.048786e+00
-, conv = 1.099993e+01
+fitness = 9.721101e-01
+, conv = 1.099912e+01
 ---------------------------------------------------
 
 
 -------------------------------------------------------
 Function = 27, Dimension size = 10
-before cma, fitness = 26997
-, conv = 2.726101e+09
-after cma, fitness = 7.162250e+03
-, conv = 7.945957e+08
+before cma, fitness = 1.255750e+04
+, conv = 2.467568e+09
+after cma, fitness = 8.290250e+03
+, conv = 7.104144e+08
 ---------------------------------------------------
-fitness = 7.162250e+03
-, conv = 7.945957e+08
+fitness = 8.290250e+03
+, conv = 7.104144e+08
 ---------------------------------------------------
 
 
 -------------------------------------------------------
 Function = 28, Dimension size = 10
-before cma, fitness = 1.231350e-05
+before cma, fitness = 7.386243e-06
 , conv = 1.326718e+04
-after cma, fitness = 4.426480e-06
+after cma, fitness = 3.233118e-06
 , conv = 1.326718e+04
 ---------------------------------------------------
-fitness = 4.426480e-06
+fitness = 3.233118e-06
 , conv = 1.326718e+04
 ---------------------------------------------------
 
->> 
+>> \
