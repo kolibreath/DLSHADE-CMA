@@ -1,4 +1,4 @@
-function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr,pattern)
+function [ui,r0] = gnOffspring(pop_struct,archive,nfes,max_nfes,f,cr,pattern)
 %GNOFFSPRING generate offspring by DE/current-to-pbetter*/
 % input:
     % pop_struct                   -- struct of population
@@ -18,7 +18,10 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr,pattern)
     problem_size = pop_struct.problem_size;
     pop = pop(:, 1:problem_size);
     popAll = [pop; archive.pop(:,1:problem_size)];
-    pbest_rate = 0.3;
+    global pbest_rate;
+    global mutation_strategy_de;
+    global mutation_strategy_cma;
+    global lu ;
     lambda = pop_struct.lambda;
     
     violated_num = length(find(pop(end) >= 0));
@@ -39,7 +42,7 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr,pattern)
     if pattern == 1
         %% DE mutation strategy without Covariance Matrix Adaptation
         % DE/rand/1
-        if rand < 0.7
+        if rand < mutation_strategy_de
             r0 = ceil(rand(1,popsize) * popsize);
             [r1, r2] = gnR1R2(popsize,size(popAll,1),r0); 
             base_vectors = pop(r0,:);
@@ -63,23 +66,16 @@ function [ui,r0] = gnOffspring(pop_struct,lu,archive,nfes,max_nfes,f,cr,pattern)
         r0 = ceil(rand(1, lambda) * popsize);
         [r1, r2] = gnR1R2(popsize, size(popAll, 1), r0);
         pbetter = zeros(lambda, problem_size);
-        %TODO 设置这里pbest 概率 为 0.3
-       
 
         for k = 1:lambda
             % 可能有部分来自best
-            if rand < 0.7
+            if rand < mutation_strategy_cma
                 pbetter(k, :) = (pop_struct.xmean' + pop_struct.sigma ...
                     * pop_struct.B * (pop_struct.D .* randn(problem_size, 1)))';
             else
                 temp = ceil(pbest_rate * popsize);
                 pbetter(k, :) = pop(randi(temp), :);
             end
-        end
-
-        % 在搜索后期的时候个体增加一点点扰动
-        if nfes >= max_nfes * 0.8
-            pbetter = pbetter + rand(lambda,problem_size) * 1e-5;
         end
 
         base_vectors = pop(r0, :);

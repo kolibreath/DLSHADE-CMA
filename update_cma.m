@@ -1,4 +1,4 @@
-function [pop_struct,cma,nfes]= update_cma(pop_struct,nfes,lu,sigma_lu,func)
+function [pop_struct,cma,nfes]= update_cma(pop_struct,nfes,func)
 % UPDATE_CMA update CMA related parameters
 % input:
     % pop_struct    -- population struct and population is sorted by
@@ -17,6 +17,8 @@ function [pop_struct,cma,nfes]= update_cma(pop_struct,nfes,lu,sigma_lu,func)
     xold = pop_struct.xmean;
     popsize = pop_struct.popsize; % mu
     lambda = pop_struct.lambda;
+    global lu;
+    global sigma_lu;
     % TODO 如果最后确定不存在任何的resize popsize的操作可以将这个代码删除
     cma = assem_cma(problem_size,lambda);
 
@@ -50,15 +52,6 @@ function [pop_struct,cma,nfes]= update_cma(pop_struct,nfes,lu,sigma_lu,func)
        pop_struct.sigma = sigma;
     end
 
-   [B,D] = eig(C); 
-   % 如果出现非正定的情况 重新初始化
-   if numel(find(D < 0)) ~= 0
-       [~,best_fit] = sortrows(pop_struct.pop,columns-1);
-        xmean = pop_struct.pop(best_fit,:);% 使用最好的结果作为xmean
-        xmean = xmean(1:problem_size);
-       [pop_struct,nfes] = initialize_cma_pop(xmean,0.3,problem_size,nfes,func,lu);       
-    return;
-   end
    
    pop_struct.C = C;
 
