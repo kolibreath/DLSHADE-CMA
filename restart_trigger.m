@@ -1,4 +1,4 @@
-function [pop_struct,nfes] = restart_trigger(pop_struct,nfes,func)
+function [pop_struct,nfes,restart_record] = restart_trigger(pop_struct,nfes,func,restart_record)
 %RESTART_TRIGGER 此处显示有关此函数的摘要
 %   此处显示详细说明
    global sigma_restart;
@@ -9,11 +9,13 @@ function [pop_struct,nfes] = restart_trigger(pop_struct,nfes,func)
    problem_size = pop_struct.problem_size;
    % 如果出现非正定的情况 重新初始化种群中的所有 或者是进行某一维度的初始化
    if ~isreal(pop_struct.C) || ~isreal(pop_struct.D) || ~isreal(pop_struct.B)
+       restart_record = [restart_record;nfes];
        if rand < restart_pos
            [~,best_fit] = sortrows(pop_struct.pop,columns-1);
             xmean = pop_struct.pop(best_fit,:);% 使用最好的结果作为xmean
             xmean = xmean(1:problem_size);
             lambda = pop_struct.lambda  * 2; 
+%             disp("restart");
            [pop_struct,nfes] = initialize_cma_pop(xmean,sigma_restart,lambda,problem_size,nfes,func);       
        else
           [pop_struct,nfes] = dim_restart(pop_struct,func,nfes);

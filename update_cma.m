@@ -12,6 +12,7 @@ function [pop_struct,cma,nfes]= update_cma(pop_struct,nfes,func)
 
     pop = pop_struct.pop;
     [~,columns] = size(pop);
+    [pop,~] = sortrows(pop,columns-1); % 按照fitness进行排序
     problem_size = pop_struct.problem_size;
     pop = pop(:, 1:problem_size);
     xold = pop_struct.xmean;

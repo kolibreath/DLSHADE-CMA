@@ -22,6 +22,7 @@ global mutation_strategy_cma;
 global deviation_tolerance;
 global dim_restart_sigma;
 global lu;
+global restart_pos;
 
 rand('seed', sum(100 * clock));
 
@@ -33,7 +34,7 @@ for func = 1:28
     fprintf('\n-------------------------------------------------------\n')
 
     %% for each problem size
-    for dim_num = 2:2
+    for dim_num = 1:1
         problem_size = Dimension_size(dim_num);
         initial_flag = 0;
         fprintf('Function = %d, Dimension size = %d\n', func, problem_size)
@@ -80,17 +81,17 @@ for func = 1:28
             cma = assem_cma(problem_size, lambda);
             sigma_lb = 1e-30;
  
-            sigma = 0.3;
-            sigma_restart = 3;
+            sigma = 1e-5;
+            sigma_restart = 1e-10;
             sigma_lu = [sigma_lb, min((lu(2) - lu(1)) / 2)];
-            global_search_rate = 0.65;
+            global_search_rate = 0.7;
             pbest_rate = 0.3;
-            mutation_strategy_de = 0.7; % 在两个不同的mutation strategy之间选择的概率
+            mutation_strategy_de = 1; % 在两个不同的mutation strategy之间选择的概率
             mutation_strategy_cma = 0.7; % pbetter选择cma或者是best的概率
             deviation_tolerance = 1e-30;
             dim_restart_sigma = 1e-13; % 作为正态分布的sigma
             
-            restart_pos = 0.7;
+            restart_pos = 0.6;
          
             
             %%  ----------------------------- Global Search Stage --------------------------------
@@ -125,7 +126,7 @@ for func = 1:28
             % 需要提高archive的大小吗？
             [pop_array,archive,nfes,cluster_number] = create_cma_pop(global_pop_struct.pop, ... 
                                     archive,problem_size, nfes, func);
-            
+            restart_record = [];
             % 先完成一个没有子种群交换的版本
             while nfes < max_nfes
                 % 每个子种群自行迭代 更新shade中的memory archive等等
@@ -152,7 +153,7 @@ for func = 1:28
                  
                     %% CMA parameters update (populations in pop_fr and pop_fo are sorted)
                     [pop_struct,cma,nfes] = update_cma(pop_struct, nfes,func);
-                    [pop_struct,nfes] = restart_trigger(pop_struct,nfes,func);       
+                    [pop_struct,nfes,restart_record] = restart_trigger(pop_struct,nfes,func,restart_record);       
                     bsf_solution = find_bsf(pop_struct, bsf_solution);
                     pop_array{i}  = pop_struct;
                 end 
